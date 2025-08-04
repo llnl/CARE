@@ -50,6 +50,10 @@
 #define CARE_TEMPLATE_ARRAY_TYPE globalID
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE globalID
+#define CARE_TEMPLATE_ARRAY_TYPE globalID
+#include "care/KeyValueSorter_inst.h"
+
 #if GLOBALID_IS_64BIT
 #define CARE_TEMPLATE_KEY_TYPE GIDTYPE
 #define CARE_TEMPLATE_ARRAY_TYPE int
