@@ -115,8 +115,8 @@ T ArrayMaxLoc(care::host_device_ptr<const T> arr, int n, T initVal, int & loc);
 template <typename T>
 int ArrayFind(care::host_device_ptr<const T> arr, const int len, const T val, const int start = 0) ;
 
-template<typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T PickAndPerformSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n);
+template<typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType PickAndPerformSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n);
 
 template<typename T, typename Exec=RAJAExec>
 int FindIndexMinAboveThresholds(care::host_device_ptr<const T> arr, int n,
@@ -166,20 +166,20 @@ int PickAndPerformFindMaxIndex(care::host_device_ptr<const T> arr,
 template <typename T, typename Exec=RAJAExec>
 int ArrayCount(care::host_device_ptr<const T> arr, int length, T val);
 
-template <typename T, typename ReducerType=T, typename Exec=RAJAExec>
-T ArraySum(care::host_device_ptr<const T> arr, int n, T initVal);
+template <typename T, typename ReducerType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArraySum(care::host_device_ptr<const T> arr, int n, T initVal);
 
-template <typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T ArraySumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> subset, int n, T initVal);
+template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArraySumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> subset, int n, T initVal);
 
-template<typename T, typename Exec=RAJAExec>
-T SumArrayOrArraySubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const>  subset, int n);
+template<typename T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType SumArrayOrArraySubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const>  subset, int n);
 
-template <typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n, T initVal);
+template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArrayMaskedSumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n, T initVal);
 
-template <typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T ArrayMaskedSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, int n, T initVal);
+template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArrayMaskedSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, int n, T initVal);
 
 template <typename T, typename Exec=RAJAExec>
 int FindIndexGT(care::host_device_ptr<const T> arr, int n, T limit);

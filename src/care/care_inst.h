@@ -875,6 +875,8 @@ int ArrayCount<globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, 
 #ifdef CARE_PARALLEL_DEVICE
 
 CARE_EXTERN template CARE_DLL_API
+int ArraySum<bool, int, RAJADeviceExec, int>(care::host_device_ptr<const bool>, int, bool) ;
+CARE_EXTERN template CARE_DLL_API
 int ArraySum<int, int, RAJADeviceExec>(care::host_device_ptr<const int>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
 float ArraySum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, int, float) ;
@@ -884,6 +886,8 @@ double ArraySum<double, double, RAJADeviceExec>(care::host_device_ptr<const doub
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
+CARE_EXTERN template CARE_DLL_API
+int ArraySum<bool, int, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, int, bool) ;
 CARE_EXTERN template CARE_DLL_API
 int ArraySum<int, int, RAJA::seq_exec>(care::host_device_ptr<const int>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
@@ -897,6 +901,8 @@ double ArraySum<double, double, RAJA::seq_exec>(care::host_device_ptr<const doub
 #ifdef CARE_PARALLEL_DEVICE
 
 CARE_EXTERN template CARE_DLL_API
+int ArraySumSubset<bool, int, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int, bool) ;
+CARE_EXTERN template CARE_DLL_API
 int ArraySumSubset<int, int, RAJADeviceExec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
 float ArraySumSubset<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
@@ -906,6 +912,8 @@ double ArraySumSubset<double, double, RAJADeviceExec>(care::host_device_ptr<cons
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
+CARE_EXTERN template CARE_DLL_API
+int ArraySumSubset<bool, int, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int, bool) ;
 CARE_EXTERN template CARE_DLL_API
 int ArraySumSubset<int, int, RAJA::seq_exec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
@@ -919,6 +927,8 @@ double ArraySumSubset<double, double, RAJA::seq_exec>(care::host_device_ptr<cons
 #ifdef CARE_PARALLEL_DEVICE
 
 CARE_EXTERN template CARE_DLL_API
+int ArrayMaskedSumSubset<bool, int, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, bool) ;
+CARE_EXTERN template CARE_DLL_API
 int ArrayMaskedSumSubset<int, int, RAJADeviceExec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSumSubset<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, float) ;
@@ -928,6 +938,8 @@ double ArrayMaskedSumSubset<double, double, RAJADeviceExec>(care::host_device_pt
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
+CARE_EXTERN template CARE_DLL_API
+int ArrayMaskedSumSubset<bool, int, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, bool) ;
 CARE_EXTERN template CARE_DLL_API
 int ArrayMaskedSumSubset<int, int, RAJA::seq_exec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
@@ -941,6 +953,8 @@ double ArrayMaskedSumSubset<double, double, RAJA::seq_exec>(care::host_device_pt
 #ifdef CARE_PARALLEL_DEVICE
 
 CARE_EXTERN template CARE_DLL_API
+int ArrayMaskedSum<bool, int, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int, bool) ;
+CARE_EXTERN template CARE_DLL_API
 int ArrayMaskedSum<int, int, RAJADeviceExec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
@@ -950,6 +964,8 @@ double ArrayMaskedSum<double, double, RAJADeviceExec>(care::host_device_ptr<cons
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
+CARE_EXTERN template CARE_DLL_API
+int ArrayMaskedSum<bool, int, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int, bool) ;
 CARE_EXTERN template CARE_DLL_API
 int ArrayMaskedSum<int, int, RAJA::seq_exec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
@@ -962,6 +978,8 @@ double ArrayMaskedSum<double, double, RAJA::seq_exec>(care::host_device_ptr<cons
 
 #ifdef CARE_PARALLEL_DEVICE
 
+CARE_EXTERN template CARE_DLL_API
+int FindIndexGT<bool, RAJADeviceExec>(care::host_device_ptr<const bool>, int, bool) ;
 CARE_EXTERN template CARE_DLL_API
 int FindIndexGT<int, RAJADeviceExec>(care::host_device_ptr<const int>, int, int) ;
 CARE_EXTERN template CARE_DLL_API
@@ -1133,6 +1151,8 @@ care::host_device_ptr<globalID> ArrayDup<globalID, RAJA::seq_exec>(RAJA::seq_exe
 #ifdef CARE_PARALLEL_DEVICE
 
 CARE_EXTERN template CARE_DLL_API
+int SumArrayOrArraySubset<bool, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int) ;
+CARE_EXTERN template CARE_DLL_API
 int SumArrayOrArraySubset<int, RAJADeviceExec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
 float SumArrayOrArraySubset<float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int) ;
@@ -1142,6 +1162,8 @@ double SumArrayOrArraySubset<double, RAJADeviceExec>(care::host_device_ptr<const
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
+CARE_EXTERN template CARE_DLL_API
+int SumArrayOrArraySubset<bool, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
 int SumArrayOrArraySubset<int, RAJA::seq_exec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API

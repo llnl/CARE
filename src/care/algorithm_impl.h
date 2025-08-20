@@ -1438,15 +1438,15 @@ CARE_INLINE int ArrayCount(care::host_device_ptr<const T> arr, int length, T val
  * Author(s) : Peter Robinson
  * Purpose   : Returns the sum of all values in a ManagedArray
  * ************************************************************************/
-template <typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArraySum(care::host_device_ptr<const T> arr, int n, T initVal)
+template <typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArraySum(care::host_device_ptr<const T> arr, int n, T initVal)
 {
    ReduceType iVal = initVal;
    RAJAReduceSum<ReduceType> sum { iVal };
    CARE_REDUCE_LOOP(k, 0, n) {
       sum += arr[k];
    } CARE_REDUCE_LOOP_END
-   return (T) (ReduceType) sum;
+   return (ReturnType) (ReduceType) sum;
 }
 
 /************************************************************************
@@ -1455,8 +1455,8 @@ CARE_INLINE T ArraySum(care::host_device_ptr<const T> arr, int n, T initVal)
  * Purpose   : Returns the sum of values in arr at indices in subset.
  * Note      : length n refers to length of subset, not array
  * ************************************************************************/
-template <typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArraySumSubset(care::host_device_ptr<const T> arr,
+template <typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArraySumSubset(care::host_device_ptr<const T> arr,
                              care::host_device_ptr<int const> subset, int n, T initVal)
 {
    ReduceType iVal = initVal;
@@ -1464,7 +1464,7 @@ CARE_INLINE T ArraySumSubset(care::host_device_ptr<const T> arr,
    CARE_REDUCE_LOOP(k, 0, n) {
       sum += arr[subset[k]];
    } CARE_REDUCE_LOOP_END
-   return (T) (ReduceType) sum;
+   return (ReturnType) (ReduceType) sum;
 }
 
 /************************************************************************
@@ -1472,8 +1472,8 @@ CARE_INLINE T ArraySumSubset(care::host_device_ptr<const T> arr,
  * Author(s) : Peter Robinson
  * Purpose   : Returns the sum of values in arr at indices in subset.
  * ************************************************************************/
-template <typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,  
+template <typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,  
                                    care::host_device_ptr<int const> mask,
                                    care::host_device_ptr<int const> subset,
                                    int n, T initVal)
@@ -1486,7 +1486,7 @@ CARE_INLINE T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,
          sum += arr[ndx];
       }
    } CARE_REDUCE_LOOP_END
-   return (T) (ReduceType) sum;
+   return (ReturnType) (ReduceType) sum;
 }
 
 /************************************************************************
@@ -1494,8 +1494,8 @@ CARE_INLINE T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,
  * Author(s) : Peter Robinson
  * Purpose   : Returns the sum of values in arr at indices where mask is 0.
  * ************************************************************************/
-template<typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArrayMaskedSum(care::host_device_ptr<const T> arr,
+template<typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArrayMaskedSum(care::host_device_ptr<const T> arr,
                              care::host_device_ptr<int const> mask,
                              int n, T initVal)
 {
@@ -1506,7 +1506,7 @@ CARE_INLINE T ArrayMaskedSum(care::host_device_ptr<const T> arr,
       sum += arr[i] * T(mask[i] == 0);
    } CARE_STREAM_LOOP_END
 
-   return (T) (ReduceType) sum ;
+   return (ReturnType) (ReduceType) sum ;
 }
 
 /************************************************************************
@@ -1690,15 +1690,15 @@ CARE_INLINE care::host_device_ptr<T> ArrayDup(RAJA::seq_exec, const T* from, int
 // SumIntArray.
 // @author Peter Robinson
 //
-template<typename T, typename Exec>
-CARE_INLINE T SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
+template<typename T, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
                                     care::host_device_ptr<int const> subset, int n)
 {
    if (subset) {
-      return ArraySumSubset<T, T, Exec>(arr, subset, n, T(0));
+      return ArraySumSubset<T, T, Exec, ReturnType>(arr, subset, n, T(0));
    }
    else {
-      return ArraySum<T, T, Exec>(arr, n, T(0));
+      return ArraySum<T, T, Exec, ReturnType>(arr, n, T(0));
    }
 }
 
@@ -1710,21 +1710,21 @@ CARE_INLINE T SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
 // @param mask Array of same length as arr
 // @param subset Array of length n.
 //
-template<typename T, typename ReduceType, typename Exec>
-CARE_INLINE T PickAndPerformSum(care::host_device_ptr<const T> arr,
+template<typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType PickAndPerformSum(care::host_device_ptr<const T> arr,
                                 care::host_device_ptr<int const> mask,
                                 care::host_device_ptr<int const> subset, int n)
 {
    if (mask) {
       if (subset) {
-         return ArrayMaskedSumSubset<T, ReduceType, Exec>(arr, mask, subset, n, T(0));
+         return ArrayMaskedSumSubset<T, ReduceType, Exec, ReturnType>(arr, mask, subset, n, T(0));
       }
       else {
-         return ArrayMaskedSum<T, ReduceType, Exec>(arr, mask, n, T(0));
+         return ArrayMaskedSum<T, ReduceType, Exec, ReturnType>(arr, mask, n, T(0));
       }
    }
    else {
-      return SumArrayOrArraySubset<T, Exec>(arr, subset, n);
+      return SumArrayOrArraySubset<T, Exec, ReturnType>(arr, subset, n);
    }
 }
 
