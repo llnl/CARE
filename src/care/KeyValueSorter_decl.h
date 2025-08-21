@@ -14,6 +14,8 @@
 #include "care/algorithm_decl.h"
 #include "care/CHAIDataGetter.h"
 
+#include <utility> // For std::move
+
 namespace care {
 
 ///////////////////////////////////////////////////////////////////////////
@@ -182,6 +184,22 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       , m_values(len, "m_values")
       {
          setKeyValueArraysFromManagedArray(m_keys, m_values, len, arr);
+      }
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Peter Robinson
+      /// @brief Constructor
+      /// Takes ownership of the provided keys and values arrays
+      /// @param[in] len - The number of elements in the arrays
+      /// @param[in] keys - The keys array to take ownership of
+      /// @param[in] values - The values array to take ownership of
+      /// @return a KeyValueSorter instance
+      ///////////////////////////////////////////////////////////////////////////
+      KeyValueSorter(const size_t len, host_device_ptr<KeyType> && keys, host_device_ptr<ValueType> && values)
+      : m_len(len)
+      , m_ownsPointers(true)
+      , m_keys(std::move(keys))
+      , m_values(std::move(values))
+      {
       }
 
       ///////////////////////////////////////////////////////////////////////////
@@ -422,6 +440,80 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       }
 
       ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Sorts "len" elements starting at "start" by key, then by value
+      /// @param[in] start - The index to start at
+      /// @param[in] len   - The number of elements to sort
+      /// @return void
+      /// TODO: add bounds checking
+      ///////////////////////////////////////////////////////////////////////////
+   void sortByKeyThenValue(const size_t start, const size_t len) {
+      // First sort by key
+      sortKeyValueArrays<RAJADeviceExec>(m_keys, m_values, start, len, false);
+      
+      if (len <= 1) return;
+      
+      // Phase 1: Identify ranges of identical keys
+      host_device_ptr<int> rangeStarts(len+1);
+      host_device_ptr<int> rangeEnds(len+1);
+      host_device_ptr<int> rangeCount(1);
+      
+      // Initialize rangeCount to 0
+      CARE_STREAM_LOOP(i, 0, 1) {
+         rangeCount[i] = 0;
+      } CARE_STREAM_LOOP_END
+      
+      // Use SCAN_LOOP to identify where ranges start
+      SCAN_LOOP(i, start, start+len-1, idx, count, 
+               (i == start) || (m_keys[i] != m_keys[i-1])) {
+         rangeStarts[idx] = i;
+      } SCAN_LOOP_END(len, idx, count)
+      
+      // Set the last range end
+      rangeStarts.set(count , start+len;
+      
+      auto values = m_values;
+      
+      // Phase 2: Sort each range by value using insertion sort in parallel
+      CARE_STREAM_LOOP(i, 0, count) {
+         int rangeStart = rangeStarts[i];
+         int rangeEnd = rangeStarts[i+1];
+         int rangeLen = rangeEnd - rangeStart;
+         
+         // Only sort if range has more than one element
+         if (rangeLen > 1) {
+            // remmber that keys are identical over this range, so no need to modify m_keys
+            InsertionSort<ValueType>(values.slice(rangeStart), rangeEnd-rangeStart);
+         }
+      } CARE_STREAM_LOOP_END
+      
+      // Free temporary arrays
+      rangeStarts.free();
+      rangeEnds.free();
+      rangeCount.free();
+   }
+
+
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Sorts the first "len" elements by key, then by value
+      /// @param[in] len - The number of elements to sort
+      /// @return void
+      ///////////////////////////////////////////////////////////////////////////
+      void sortByKeyThenValue(const size_t len) {
+         sortByKeyThenValue(0, len);
+      }
+
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Sorts all the elements by key, then by value
+      /// @return void
+      ///////////////////////////////////////////////////////////////////////////
+      void sortByKeyThenValue() {
+         sortByKeyThenValue(0, m_len);
+      }
+
+      ///////////////////////////////////////////////////////////////////////////
       /// @author Alan Dayton
       /// @brief Does a stable sort on "len" elements starting at "start" by value
       /// @param[in] start - The index to start at
@@ -489,11 +581,76 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             sortByKey();
          }
       }
+      
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Eliminates duplicate key-value pairs
+      /// First does a sort by key and then by value, which groups identical pairs.
+      /// Then duplicates are removed.
+      /// @return void
+      ///////////////////////////////////////////////////////////////////////////
+      void eliminateDuplicatePairs() {
+         if (m_len > 1) {
+            // First sort by key and then by value to group identical pairs
+            sortByKeyThenValue();
+            
+            // Allocate storage for tracking unique elements
+            host_device_ptr<int> isUnique(m_len+1);
+            
+            // Mark unique elements (first element is always unique)
+            CARE_STREAM_LOOP(i, 0, m_len+1) {
+                  if (i == 0) {
+                     isUnique[i] = 1;
+                  }
+                  else if (i == m_len) {
+                     isUnique = false;
+                  }
+                  else {
+                     // Element is unique if it differs from the previous element
+                     // in either key or value
+                     isUnique[i] = (m_keys[i] != m_keys[i-1] || 
+                                    m_values[i] != m_values[i-1]) ? 1 : 0;
+                  }
+            } CARE_STREAM_LOOP_END
+            
+            // Use exclusive scan to compute output positions
+            host_device_ptr<int> positions(m_len+1);
+            care::exclusive_scan(RAJADeviceExec{}, isUnique, positions, m_len, 0, false);
+            
+            // Get the total number of unique elements
+            int newSize = positions.pick(m_len);
+            
+            // Allocate new arrays for the unique elements
+            host_device_ptr<KeyType> newKeys(newSize, "newKeys");
+            host_device_ptr<ValueType> newValues(newSize, "newValues");
+            
+            // Copy unique elements to their new positions
+            CARE_STREAM_LOOP(i, 0, m_len) {
+                  if (isUnique[i]) {
+                     int pos = positions[i];
+                     newKeys[pos] = m_keys[i];
+                     newValues[pos] = m_values[i];
+                  }
+            } CARE_STREAM_LOOP_END
+            
+            // Free temporary arrays
+            isUnique.free();
+            positions.free();
+            
+            // Free the original key value pairs
+            free();
+            
+            // Set to new key value pairs
+            m_keys = newKeys;
+            m_values = newValues;
+            m_len = newSize;
+         }
+}
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Benjamin Liu
       /// @brief no-op
-      /// GPU version does not require separate allocation for kesy array.
+      /// GPU version does not require separate allocation for keys array.
       /// @return void
       ///////////////////////////////////////////////////////////////////////////
       void initializeKeys() const {
@@ -602,6 +759,22 @@ template <typename KeyValueType>
 inline bool cmpKeys(KeyValueType const & left, KeyValueType const & right)
 {
    return left.key < right.key;
+}
+
+///////////////////////////////////////////////////////////////////////////
+/// @author Robinson96
+/// @brief Less than comparison operator for keys, then values
+/// Used as a comparator in the STL
+/// @param left  - left _kv to compare
+/// @param right - right _kv to compare
+/// @return true if left's key is less than right's key, or if keys are equal
+///         and left's value is less than right's value
+///////////////////////////////////////////////////////////////////////////
+template <typename KeyValueType>
+inline bool cmpKeysThenValues(KeyValueType const & left, KeyValueType const & right)
+{
+   return (left.key < right.key) || 
+          ((left.key == right.key) && (left.value < right.value));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -741,6 +914,29 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       , m_keyValues(len, "m_keyValues")
       {
          setKeyValueArraysFromManagedArray(m_keyValues, len, arr);
+      }
+
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Peter Robinson
+      /// @brief Constructor
+      /// Takes ownership of the provided keys and values arrays
+      /// @param[in] len - The number of elements in the arrays
+      /// @param[in] keys - The keys array to take ownership of
+      /// @param[in] values - The values array to take ownership of
+      /// @return a KeyValueSorter instance
+      ///////////////////////////////////////////////////////////////////////////
+      KeyValueSorter(const size_t len, host_device_ptr<KeyType> && keys, host_device_ptr<ValueType> && values)
+      : m_len(len)
+      , m_ownsPointers(true)
+      , m_keys(std::move(keys))
+      , m_values(std::move(values))
+      , m_keyValues(len, "m_keyValues")
+      {
+         // Initialize m_keyValues from the provided keys and values
+         for (size_t i = 0; i < m_len; ++i) {
+            m_keyValues[i].key = m_keys[i];
+            m_keyValues[i].value = m_values[i];
+         }
       }
 
       ///////////////////////////////////////////////////////////////////////////
@@ -1013,6 +1209,48 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       void sortByKey() const {
          sortByKey(m_len);
       }
+      
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Sorts "len" elements starting at "start" by key, then by value
+      /// @param[in] start - The index to start at
+      /// @param[in] len   - The number of elements to sort
+      /// @return void
+      /// TODO: add bounds checking
+      ///////////////////////////////////////////////////////////////////////////
+      void sortByKeyThenValue(const size_t start, const size_t len) const {
+         CHAIDataGetter<_kv<KeyType, ValueType>, RAJA::seq_exec> getter {};
+         _kv<KeyType, ValueType> * rawData = getter.getRawArrayData(m_keyValues) + start;
+         std::stable_sort(rawData, rawData + len, cmpKeysThenValues<_kv<KeyType,ValueType>>);
+
+         // Free stale arrays
+         if (m_keys) {
+            m_keys.free();
+         }
+
+         if (m_values) {
+            m_values.free();
+         }
+      }
+
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Sorts the first "len" elements by key, then by value
+      /// @param[in] len - The number of elements to sort
+      /// @return void
+      ///////////////////////////////////////////////////////////////////////////
+      void sortByKeyThenValue(const size_t len) const {
+         sortByKeyThenValue(0, len);
+      }
+
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Sorts all the elements by key, then by value
+      /// @return void
+      ///////////////////////////////////////////////////////////////////////////
+      void sortByKeyThenValue() const {
+         sortByKeyThenValue(m_len);
+      }
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Alan Dayton
@@ -1058,6 +1296,60 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
          if (m_len > 1) {
             m_len = eliminateKeyValueDuplicates(m_keyValues, m_len) ;
 
+            // Free stale arrays
+            if (m_keys) {
+               m_keys.free();
+            }
+
+            if (m_values) {
+               m_values.free();
+            }
+         }
+      }
+      
+      ///////////////////////////////////////////////////////////////////////////
+      /// @author Robinson96
+      /// @brief Eliminates duplicate key-value pairs
+      /// First does a sort by key and then by value, which groups identical pairs.
+      /// Then duplicates are removed.
+      /// @return void
+      ///////////////////////////////////////////////////////////////////////////
+      void eliminateDuplicatePairs(bool verbose = false) {
+         if (m_len > 1) {
+            // First sort by key and then by value to group identical pairs
+            sortByKeyThenValue();
+            // Create a new array to hold the unique pairs
+            host_device_ptr<_kv<KeyType, ValueType>> uniquePairs(m_len, "uniquePairs");
+            // Copy the first element
+            uniquePairs[0] = m_keyValues[0];
+            if (verbose) {
+                  std::cout << "Copying first element: (" << m_keyValues[0].key << ", " 
+                           << m_keyValues[0].value << ")" << std::endl;
+            }
+            // Copy only non-duplicate elements
+            size_t newSize = 1;
+            for (size_t i = 1; i < m_len; ++i) {
+                  if (m_keyValues[i].key != m_keyValues[i-1].key || 
+                     m_keyValues[i].value != m_keyValues[i-1].value) {
+                     uniquePairs[newSize] = m_keyValues[i];
+                     ++newSize;
+                     if (verbose) {
+                        std::cout << "Copying unique element: (" << m_keyValues[i].key << ", " 
+                                    << m_keyValues[i].value << ")" << std::endl;
+                     }
+                  }
+            }
+            
+            // Free the original key value pairs
+            m_keyValues.free();
+            
+            // Set to new key value pairs
+            m_keyValues = uniquePairs;
+            m_len = newSize;
+            
+            // Reallocate to the correct size
+            m_keyValues.realloc(newSize);
+            
             // Free stale arrays
             if (m_keys) {
                m_keys.free();
@@ -1213,4 +1505,3 @@ void IntersectKeyValueSorters(RAJA::seq_exec exec,
 } // namespace care
 
 #endif // !defined(_CARE_KEY_VALUE_SORTER_DECL_H_)
-
