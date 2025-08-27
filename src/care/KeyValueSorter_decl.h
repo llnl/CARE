@@ -440,7 +440,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       }
 
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Sorts "len" elements starting at "start" by key, then by value
       /// @param[in] start - The index to start at
       /// @param[in] len   - The number of elements to sort
@@ -462,15 +462,19 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       CARE_STREAM_LOOP(i, 0, 1) {
          rangeCount[i] = 0;
       } CARE_STREAM_LOOP_END
+
+      int count = 0;
+
+      auto keys = m_keys;
       
       // Use SCAN_LOOP to identify where ranges start
       SCAN_LOOP(i, start, start+len-1, idx, count, 
-               (i == start) || (m_keys[i] != m_keys[i-1])) {
+               (i == start) || (keys[i] != keys[i-1])) {
          rangeStarts[idx] = i;
       } SCAN_LOOP_END(len, idx, count)
       
       // Set the last range end
-      rangeStarts.set(count , start+len;
+      rangeStarts.set(count , start+len);
       
       auto values = m_values;
       
@@ -495,7 +499,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
 
 
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Sorts the first "len" elements by key, then by value
       /// @param[in] len - The number of elements to sort
       /// @return void
@@ -505,7 +509,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       }
 
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Sorts all the elements by key, then by value
       /// @return void
       ///////////////////////////////////////////////////////////////////////////
@@ -583,7 +587,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       }
       
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Eliminates duplicate key-value pairs
       /// First does a sort by key and then by value, which groups identical pairs.
       /// Then duplicates are removed.
@@ -598,18 +602,21 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             host_device_ptr<int> isUnique(m_len+1);
             
             // Mark unique elements (first element is always unique)
-            CARE_STREAM_LOOP(i, 0, m_len+1) {
+            auto len = m_len;
+            auto keys = m_keys;
+            auto values = m_values;
+            CARE_STREAM_LOOP(i, 0, len+1) {
                   if (i == 0) {
                      isUnique[i] = 1;
                   }
-                  else if (i == m_len) {
-                     isUnique = false;
+                  else if (i == len) {
+                     isUnique[i] = false;
                   }
                   else {
                      // Element is unique if it differs from the previous element
                      // in either key or value
-                     isUnique[i] = (m_keys[i] != m_keys[i-1] || 
-                                    m_values[i] != m_values[i-1]) ? 1 : 0;
+                     isUnique[i] = (keys[i] != keys[i-1] || 
+                                    values[i] != values[i-1]) ? 1 : 0;
                   }
             } CARE_STREAM_LOOP_END
             
@@ -762,7 +769,7 @@ inline bool cmpKeys(KeyValueType const & left, KeyValueType const & right)
 }
 
 ///////////////////////////////////////////////////////////////////////////
-/// @author Robinson96
+/// @author Peter Robinson
 /// @brief Less than comparison operator for keys, then values
 /// Used as a comparator in the STL
 /// @param left  - left _kv to compare
@@ -1211,7 +1218,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       }
       
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Sorts "len" elements starting at "start" by key, then by value
       /// @param[in] start - The index to start at
       /// @param[in] len   - The number of elements to sort
@@ -1234,7 +1241,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       }
 
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Sorts the first "len" elements by key, then by value
       /// @param[in] len - The number of elements to sort
       /// @return void
@@ -1244,7 +1251,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       }
 
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Sorts all the elements by key, then by value
       /// @return void
       ///////////////////////////////////////////////////////////////////////////
@@ -1308,7 +1315,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       }
       
       ///////////////////////////////////////////////////////////////////////////
-      /// @author Robinson96
+      /// @author Peter Robinson
       /// @brief Eliminates duplicate key-value pairs
       /// First does a sort by key and then by value, which groups identical pairs.
       /// Then duplicates are removed.
