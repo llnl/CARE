@@ -14,6 +14,8 @@
 #include "care/algorithm_decl.h"
 #include "care/CHAIDataGetter.h"
 
+#include "care/scan.h"
+
 #include <utility> // For std::move
 
 namespace care {
