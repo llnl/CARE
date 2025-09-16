@@ -497,3 +497,24 @@ void ExpandArrayInPlace(RAJADeviceExec, care::host_device_ptr<T> array, care::ho
 
 #endif // !defined(CARE_ALGORITHM_DECL_H)
 
+
+/************************************************************************
+ * Function  : uniqLocal
+ * Author(s) : Benjamin Liu
+ * Purpose   : General uniq routine to call from within RAJA loops.
+ ************************************************************************/
+template <typename T>
+CARE_HOST_DEVICE inline void uniqLocal(care::local_ptr<T> array, int& len)
+{
+   if (len <= 1) {
+      return;
+   }
+
+   int j = 0;
+   for (int i = 1; i < len; ++i) {
+      if (array[j] != array[i]) {
+         array[++j] = array[i];
+      }
+   }
+   len = j + 1;
+}

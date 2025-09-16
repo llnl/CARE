@@ -1331,10 +1331,12 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
             host_device_ptr<_kv<KeyType, ValueType>> uniquePairs(m_len, "uniquePairs");
             // Copy the first element
             uniquePairs[0] = m_keyValues[0];
+            #ifdef CARE_DEVICE_COMPILE
             if (verbose) {
                   std::cout << "Copying first element: (" << m_keyValues[0].key << ", " 
                            << m_keyValues[0].value << ")" << std::endl;
             }
+            #endif
             // Copy only non-duplicate elements
             size_t newSize = 1;
             for (size_t i = 1; i < m_len; ++i) {
@@ -1342,10 +1344,12 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
                      m_keyValues[i].value != m_keyValues[i-1].value) {
                      uniquePairs[newSize] = m_keyValues[i];
                      ++newSize;
+                  #ifdef CARE_DEVICE_COMPILE
                      if (verbose) {
                         std::cout << "Copying unique element: (" << m_keyValues[i].key << ", " 
                                     << m_keyValues[i].value << ")" << std::endl;
                      }
+                  #endif
                   }
             }
             
