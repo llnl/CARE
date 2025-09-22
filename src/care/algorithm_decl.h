@@ -364,7 +364,7 @@ int uniqArray(RAJADeviceExec exec, care::host_device_ptr<T> & Array, size_t len,
 template <typename T, typename Exec>
 void sort_uniq(Exec e, care::host_device_ptr<T> * array, int * len, bool noCopy = false);
 
-enum class compress_array { removed_list, mapping_list };
+enum class compress_array { removed_list, mapping_list, remove_flag_list, keep_flag_list };
 
 template <typename T>
 void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, const int arrLen,
