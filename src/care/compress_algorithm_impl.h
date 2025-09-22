@@ -37,7 +37,7 @@ namespace care {
 **************************************************************************/
 #ifdef CARE_PARALLEL_DEVICE
 template <typename T>
-CARE_INLINE void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & arr, const int arrLen,
+CARE_INLINE int CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & arr, const int arrLen,
                               care::host_device_ptr<int const> list, const int listLen,
                               const care::compress_array listType, bool realloc)
 {
@@ -76,6 +76,7 @@ CARE_INLINE void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & a
          arr[newIndex] = tmp[oldIndex] ;
       } CARE_STREAM_LOOP_END
       tmp.free();
+      return listLen;
    }
    else if (listType == care::compress_array::remove_flag_list) {
       // For remove_flag_list, 1 means remove the element, 0 means keep it
@@ -105,6 +106,7 @@ CARE_INLINE void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & a
       }
       
       keepIndices.free();
+      return numKept;
    }
    else if (listType == care::compress_array::keep_flag_list) {
       // For keep_flag_list, 1 means keep the element, 0 means remove it
@@ -132,6 +134,7 @@ CARE_INLINE void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & a
          ArrayCopy(exec, arr, reinterpret_cast<care::host_device_ptr<const T> &>(tmp), numKept);
          tmp.free();
       }
+      return numKept;
       
       keepIndices.free();
    }
@@ -159,7 +162,7 @@ CARE_INLINE void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & a
 *             Requires both arr and list to be sorted for removed_list.
 **************************************************************************/
 template <typename T>
-CARE_INLINE void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, const int arrLen,
+CARE_INLINE int CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, const int arrLen,
                               care::host_device_ptr<int const> list, const int listLen,
                               const care::compress_array listType, bool realloc)
 {
@@ -195,6 +198,7 @@ CARE_INLINE void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, c
       if (realloc) {
          arr.realloc(arrLen - listLen) ;
       }
+      return arrLen - listLen;
    }
    else if (listType == care::compress_array::mapping_list) {
       CARE_SEQUENTIAL_LOOP(newIndex, 0, listLen) {
@@ -209,6 +213,7 @@ CARE_INLINE void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, c
       if (realloc) {
          arr.realloc(listLen) ;
       }
+      return listLen;
    }
    else if (listType == care::compress_array::remove_flag_list) {
       // For remove_flag_list, 1 means remove the element, 0 means keep it
@@ -227,6 +232,7 @@ CARE_INLINE void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, c
       if (realloc) {
          arr.realloc(numKept);
       }
+      return numKept;
    }
    else if (listType == care::compress_array::keep_flag_list) {
       // For keep_flag_list, 1 means keep the element, 0 means remove it
@@ -268,7 +274,7 @@ CARE_INLINE void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, c
 *             implementation for removed_list.
 **************************************************************************/
 template <typename T>
-CARE_INLINE void CompressArray(care::host_device_ptr<T> & arr, const int arrLen,
+CARE_INLINE int CompressArray(care::host_device_ptr<T> & arr, const int arrLen,
                               care::host_device_ptr<int const> list, const int listLen,
                               const care::compress_array listType, bool realloc)
 {
