@@ -449,55 +449,48 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       /// @return void
       /// TODO: add bounds checking
       ///////////////////////////////////////////////////////////////////////////
-   void sortByKeyThenValue(const size_t start, const size_t len) {
-      // First sort by key
-      sortKeyValueArrays<RAJADeviceExec>(m_keys, m_values, start, len, false);
-      
-      if (len <= 1) return;
-      
-      // Phase 1: Identify ranges of identical keys
-      host_device_ptr<int> rangeStarts(len+1);
-      host_device_ptr<int> rangeEnds(len+1);
-      host_device_ptr<int> rangeCount(1);
-      
-      // Initialize rangeCount to 0
-      CARE_STREAM_LOOP(i, 0, 1) {
-         rangeCount[i] = 0;
-      } CARE_STREAM_LOOP_END
+      void sortByKeyThenValue(const size_t start, const size_t len) {
+         if (len <= 1) return;
 
-      int count = 0;
+         // First sort by key
+         sortKeyValueArrays<RAJADeviceExec>(m_keys, m_values, start, len, false);
 
-      auto keys = m_keys;
-      
-      // Use SCAN_LOOP to identify where ranges start
-      SCAN_LOOP(i, start, start+len-1, idx, count, 
-               (i == start) || (keys[i] != keys[i-1])) {
-         rangeStarts[idx] = i;
-      } SCAN_LOOP_END(len, idx, count)
-      
-      // Set the last range end
-      rangeStarts.set(count , start+len);
-      
-      auto values = m_values;
-      
-      // Phase 2: Sort each range by value using insertion sort in parallel
-      CARE_STREAM_LOOP(i, 0, count) {
-         int rangeStart = rangeStarts[i];
-         int rangeEnd = rangeStarts[i+1];
-         int rangeLen = rangeEnd - rangeStart;
+         // Phase 1: Identify ranges of identical keys
+         host_device_ptr<int> rangeStarts(len+1);
+         host_device_ptr<int> rangeEnds(len+1);
+
+         int count = 0;
+
+         auto keys = m_keys;
          
-         // Only sort if range has more than one element
-         if (rangeLen > 1) {
-            // remmber that keys are identical over this range, so no need to modify m_keys
-            InsertionSort<ValueType>(values.slice(rangeStart), rangeEnd-rangeStart);
-         }
-      } CARE_STREAM_LOOP_END
-      
-      // Free temporary arrays
-      rangeStarts.free();
-      rangeEnds.free();
-      rangeCount.free();
-   }
+         // Use SCAN_LOOP to identify where ranges start
+         SCAN_LOOP(i, start, start+len-1, idx, count,
+                  (i == start) || (keys[i] != keys[i-1])) {
+            rangeStarts[idx] = i;
+         } SCAN_LOOP_END(len, idx, count)
+
+         // Set the last range end
+         rangeStarts.set(count , start+len);
+
+         auto values = m_values;
+
+         // Phase 2: Sort each range by value using insertion sort in parallel
+         CARE_STREAM_LOOP(i, 0, count) {
+            int rangeStart = rangeStarts[i];
+            int rangeEnd = rangeStarts[i+1];
+            int rangeLen = rangeEnd - rangeStart;
+
+            // Only sort if range has more than one element
+            if (rangeLen > 1) {
+               // remmber that keys are identical over this range, so no need to modify m_keys
+               InsertionSort<ValueType>(values.slice(rangeStart), rangeEnd-rangeStart);
+            }
+         } CARE_STREAM_LOOP_END
+
+         // Free temporary arrays
+         rangeStarts.free();
+         rangeEnds.free();
+      }
 
 
       ///////////////////////////////////////////////////////////////////////////
@@ -608,18 +601,18 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             auto keys = m_keys;
             auto values = m_values;
             CARE_STREAM_LOOP(i, 0, len+1) {
-                  if (i == 0) {
-                     isUnique[i] = 1;
-                  }
-                  else if (i == len) {
-                     isUnique[i] = false;
-                  }
-                  else {
-                     // Element is unique if it differs from the previous element
-                     // in either key or value
-                     isUnique[i] = (keys[i] != keys[i-1] || 
-                                    values[i] != values[i-1]) ? 1 : 0;
-                  }
+               if (i == 0) {
+                  isUnique[i] = 1;
+               }
+               else if (i == len) {
+                  isUnique[i] = 0;
+               }
+               else {
+                  // Element is unique if it differs from the previous element
+                  // in either key or value
+                  isUnique[i] = (keys[i] != keys[i-1] ||
+                                 values[i] != values[i-1]) ? 1 : 0;
+               }
             } CARE_STREAM_LOOP_END
             
             // Use exclusive scan to compute output positions
@@ -635,11 +628,11 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             
             // Copy unique elements to their new positions
             CARE_STREAM_LOOP(i, 0, m_len) {
-                  if (isUnique[i]) {
-                     int pos = positions[i];
-                     newKeys[pos] = m_keys[i];
-                     newValues[pos] = m_values[i];
-                  }
+               if (isUnique[i]) {
+                  int pos = positions[i];
+                  newKeys[pos] = m_keys[i];
+                  newValues[pos] = m_values[i];
+               }
             } CARE_STREAM_LOOP_END
             
             // Free temporary arrays
@@ -654,7 +647,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             m_values = newValues;
             m_len = newSize;
          }
-}
+      }
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Benjamin Liu
@@ -1323,7 +1316,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       /// Then duplicates are removed.
       /// @return void
       ///////////////////////////////////////////////////////////////////////////
-      void eliminateDuplicatePairs(bool verbose = false) {
+      void eliminateDuplicatePairs() {
          if (m_len > 1) {
             // First sort by key and then by value to group identical pairs
             sortByKeyThenValue();
@@ -1331,26 +1324,14 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
             host_device_ptr<_kv<KeyType, ValueType>> uniquePairs(m_len, "uniquePairs");
             // Copy the first element
             uniquePairs[0] = m_keyValues[0];
-            #ifdef CARE_DEVICE_COMPILE
-            if (verbose) {
-                  std::cout << "Copying first element: (" << m_keyValues[0].key << ", " 
-                           << m_keyValues[0].value << ")" << std::endl;
-            }
-            #endif
             // Copy only non-duplicate elements
             size_t newSize = 1;
             for (size_t i = 1; i < m_len; ++i) {
-                  if (m_keyValues[i].key != m_keyValues[i-1].key || 
-                     m_keyValues[i].value != m_keyValues[i-1].value) {
-                     uniquePairs[newSize] = m_keyValues[i];
-                     ++newSize;
-                  #ifdef CARE_DEVICE_COMPILE
-                     if (verbose) {
-                        std::cout << "Copying unique element: (" << m_keyValues[i].key << ", " 
-                                    << m_keyValues[i].value << ")" << std::endl;
-                     }
-                  #endif
-                  }
+               if (m_keyValues[i].key != m_keyValues[i-1].key ||
+                  m_keyValues[i].value != m_keyValues[i-1].value) {
+                  uniquePairs[newSize] = m_keyValues[i];
+                  ++newSize;
+               }
             }
             
             // Free the original key value pairs
