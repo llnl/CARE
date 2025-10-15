@@ -26,7 +26,7 @@ set(CUDA_TOOLKIT_ROOT_DIR "/usr/tce/packages/cuda/cuda-${CUDA_VER}" CACHE PATH "
 set(CMAKE_CUDA_COMPILER "${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc" CACHE PATH "")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler=--gcc-toolchain=${GCC_DIR} -Wno-deprecated-gpu-targets -Wno-unused-command-line-argument" CACHE STRING "")
 set(CMAKE_CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}" CACHE PATH "")
-set(CMAKE_CUDA_ARCHITECTURES "90" CACHE STRING "")
+set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "")
 
 # Prevent incorrect implicit libraries from being linked in
 set(BLT_CMAKE_IMPLICIT_LINK_DIRECTORIES_EXCLUDE "/usr/tce/packages/gcc/gcc-10.3.1/lib/gcc/x86_64-redhat-linux/10;/usr/tce/packages/gcc/gcc-10.3.1/lib64;/lib64;/usr/lib64;/lib;/usr/lib" CACHE STRING "")
