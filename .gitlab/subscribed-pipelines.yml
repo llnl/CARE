@@ -1,6 +1,5 @@
 ###############################################################################
-# Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-# project contributors. See the CARE LICENSE file for details.
+# Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE project contributors. See the CARE LICENSE file for details.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 ###############################################################################
@@ -39,7 +38,6 @@ generate-job-lists:
   script:
     - cat ${RADIUSS_JOBS_PATH}/dane.yml ${LOCAL_JOBS_PATH}/dane.yml > dane-jobs.yml
     - cat ${RADIUSS_JOBS_PATH}/matrix.yml ${LOCAL_JOBS_PATH}/matrix.yml > matrix-jobs.yml
-    - cat ${RADIUSS_JOBS_PATH}/lassen.yml ${LOCAL_JOBS_PATH}/lassen.yml > lassen-jobs.yml
     - cat ${RADIUSS_JOBS_PATH}/corona.yml ${LOCAL_JOBS_PATH}/corona.yml > corona-jobs.yml
     - cat ${RADIUSS_JOBS_PATH}/tioga.yml ${LOCAL_JOBS_PATH}/tioga.yml > tioga-jobs.yml
     - cat ${RADIUSS_JOBS_PATH}/tuolumne.yml ${LOCAL_JOBS_PATH}/tuolumne.yml > tuolumne-jobs.yml
@@ -47,7 +45,6 @@ generate-job-lists:
     paths:
       - dane-jobs.yml
       - matrix-jobs.yml
-      - lassen-jobs.yml
       - corona-jobs.yml
       - tioga-jobs.yml
       - tuolumne-jobs.yml
@@ -155,25 +152,3 @@ tuolumne-build-and-test:
     - if: '$ON_TUOLUMNE == "OFF"'
       when: never
     - when: on_success
-
-# LASSEN
-lassen-up-check:
-  variables:
-    CI_MACHINE: "lassen"
-  extends: [.machine-check]
-  rules:
-    - if: '$ON_LASSEN == "OFF"'
-      when: never
-    - when: on_success
-
-lassen-build-and-test:
-  variables:
-    CI_MACHINE: "lassen"
-  needs: [lassen-up-check, generate-job-lists]
-  extends: [.build-and-test]
-  rules:
-    - if: '$ON_LASSEN == "OFF"'
-      when: never
-    - when: on_success
-
-
