@@ -12,6 +12,11 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Release date yyyy-mm-dd
+
+### Fixed
+- Removed template arguments when declaring special member functions of a template class. They are unnecessary and even disallowed by some compilers.
+
 ## [Version 0.15.2] - Release date 2025-09-15
 
 ### Added
