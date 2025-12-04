@@ -102,14 +102,14 @@ OMP_FOR_BEGIN for (auto INDEX = _care_openmp_for_loop_begin_ndx; INDEX < _care_o
 #define CARE_CHECKED_CHUNKED_OPENMP_FOR_LOOP_START(INDEX, START_INDEX, END_INDEX, CHUNK_SIZE, CHECK) {\
  CARE_NEST_BEGIN(CHECK) \
  auto const _care_openmp_for_loop_end_ndx = END_INDEX; \
- decltype(_care_openmp_for_loop_end_ndx) _care_openmp_for_loop_ndx = START_INDEX; \
+ auto _care_openmp_for_loop_ndx = START_INDEX; \
  decltype(_care_openmp_for_loop_end_ndx) _care_open_chunked_for_loop_chunk_size = CHUNK_SIZE > 0 ? CHUNK_SIZE : END_INDEX - START_INDEX ; \
- while (_care_openmp_for_loop_begin_ndx < _care_openmp_for_loop_end_ndx) { \
+ while (_care_openmp_for_loop_ndx < _care_openmp_for_loop_end_ndx) { \
     decltype(_care_openmp_for_loop_end_ndx) _care_openmp_for_loop_chunk_begin_ndx = _care_openmp_for_loop_ndx ; \
-    decltype(_care_openmp_for_loop_end_ndx) _care_openmp_for_loop_chunk_end_ndx = (_care_openmp_for_loop_ndx + _care_open_chunked_for_loop_chunk_size) ? _care_openmp_for_loop_ndx + _care_open_chunked_for_loop_chunk_size : _care_openmp_for_loop_end_ndx ; \
+    decltype(_care_openmp_for_loop_end_ndx) _care_openmp_for_loop_chunk_end_ndx = (_care_openmp_for_loop_ndx + _care_open_chunked_for_loop_chunk_size < _care_openmp_for_loop_end_ndx) ? _care_openmp_for_loop_ndx + _care_open_chunked_for_loop_chunk_size : _care_openmp_for_loop_end_ndx ; \
 OMP_FOR_BEGIN for (auto INDEX = _care_openmp_for_loop_chunk_begin_ndx; INDEX < _care_openmp_for_loop_chunk_end_ndx; ++INDEX) {\
 
-#define CARE_CHECKED_CHUNKED_OPENMP_FOR_LOOP_END(CHECK) } OMP_FOR_END } CARE_NEST_END(CHECK) }
+#define CARE_CHECKED_CHUNKED_OPENMP_FOR_LOOP_END(CHECK) } OMP_FOR_END _care_openmp_for_loop_ndx = _care_openmp_for_loop_chunk_end_ndx; } CARE_NEST_END(CHECK) }
 
 
 
@@ -417,7 +417,7 @@ OMP_FOR_BEGIN for (auto INDEX = _care_openmp_for_loop_chunk_begin_ndx; INDEX < _
 /// @arg[in] CHECK The variable to check that the start and end macros match
 ///
 ////////////////////////////////////////////////////////////////////////////////
-#define CARE_CHECKED_CHUNKED_MANAGED_PTR_LOOP_START(INDEX, START_INDEX, END_INDEX, CHECK) CARE_CHECKED_CHUNKED_OPENMP_FOR_LOOP_START(INDEX, START_INDEX, END_INDEX, CHUNK_SIZE, CHECK)
+#define CARE_CHECKED_CHUNKED_MANAGED_PTR_LOOP_START(INDEX, START_INDEX, END_INDEX, CHUNK_SIZE, CHECK) CARE_CHECKED_CHUNKED_OPENMP_FOR_LOOP_START(INDEX, START_INDEX, END_INDEX, CHUNK_SIZE, CHECK)
 
 #define CARE_CHECKED_CHUNKED_MANAGED_PTR_LOOP_END(CHECK) CARE_CHECKED_CHUNKED_OPENMP_FOR_LOOP_END(CHECK)
 
