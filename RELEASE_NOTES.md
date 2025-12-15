@@ -16,6 +16,7 @@ The format of this file is based on [Keep a Changelog](http://keepachangelog.com
 
 ### Fixed
 - Removed template arguments when declaring special member functions of a template class. They are unnecessary and even disallowed by some compilers.
+- Fixes for chunked managed pointer and chunked openmp loop macros
 
 ## [Version 0.15.2] - Release date 2025-09-15
 
