@@ -1535,15 +1535,15 @@ CARE_INLINE care::host_device_ptr<T> ArrayDup(RAJA::seq_exec, const T* from, int
 // SumIntArray.
 // @author Peter Robinson
 //
-template<typename T, typename Exec, typename ReturnType>
+template<typename T, typename ReduceType, typename Exec, typename ReturnType>
 CARE_INLINE ReturnType SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
                                     care::host_device_ptr<int const> subset, int n)
 {
    if (subset) {
-      return ArraySumSubset<T, T, Exec, ReturnType>(arr, subset, n, T(0));
+      return ArraySumSubset<T, ReduceType, Exec, ReturnType>(arr, subset, n, T(0));
    }
    else {
-      return ArraySum<T, T, Exec, ReturnType>(arr, n, T(0));
+      return ArraySum<T, ReduceType, Exec, ReturnType>(arr, n, T(0));
    }
 }
 
@@ -1569,7 +1569,7 @@ CARE_INLINE ReturnType PickAndPerformSum(care::host_device_ptr<const T> arr,
       }
    }
    else {
-      return SumArrayOrArraySubset<T, Exec, ReturnType>(arr, subset, n);
+      return SumArrayOrArraySubset<T, ReduceType, Exec, ReturnType>(arr, subset, n);
    }
 }
 

@@ -1151,25 +1151,25 @@ care::host_device_ptr<globalID> ArrayDup<globalID, RAJA::seq_exec>(RAJA::seq_exe
 #ifdef CARE_PARALLEL_DEVICE
 
 CARE_EXTERN template CARE_DLL_API
-int SumArrayOrArraySubset<bool, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int) ;
+int SumArrayOrArraySubset<bool, int, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
-int SumArrayOrArraySubset<int, RAJADeviceExec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int) ;
+int SumArrayOrArraySubset<int, int, RAJADeviceExec, int>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
-float SumArrayOrArraySubset<float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int) ;
+float SumArrayOrArraySubset<float, float, RAJADeviceExec, float>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
-double SumArrayOrArraySubset<double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int) ;
+double SumArrayOrArraySubset<double, double, RAJADeviceExec, double>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int) ;
 // TODO GID not implemented
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
 CARE_EXTERN template CARE_DLL_API
-int SumArrayOrArraySubset<bool, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int) ;
+int SumArrayOrArraySubset<bool, int, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
-int SumArrayOrArraySubset<int, RAJA::seq_exec>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int) ;
+int SumArrayOrArraySubset<int, int, RAJA::seq_exec, int>(care::host_device_ptr<const int>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
-float SumArrayOrArraySubset<float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int) ;
+float SumArrayOrArraySubset<float, float, RAJA::seq_exec, float>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
-double SumArrayOrArraySubset<double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int) ;
+double SumArrayOrArraySubset<double, double, RAJA::seq_exec, double>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int) ;
 // TODO GID not implemented
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1182,6 +1182,8 @@ CARE_EXTERN template CARE_DLL_API
 float PickAndPerformSum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
 double PickAndPerformSum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int) ;
+CARE_EXTERN template CARE_DLL_API
+int PickAndPerformSum<bool, int, RAJADeviceExec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int) ;
 // TODO GID not implemented
 
 #endif // defined(CARE_PARALLEL_DEVICE)
@@ -1192,6 +1194,8 @@ CARE_EXTERN template CARE_DLL_API
 float PickAndPerformSum<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int) ;
 CARE_EXTERN template CARE_DLL_API
 double PickAndPerformSum<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int) ;
+CARE_EXTERN template CARE_DLL_API
+int PickAndPerformSum<bool, int, RAJA::seq_exec, int>(care::host_device_ptr<const bool>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int) ;
 // TODO GID not implemented
 
 ///////////////////////////////////////////////////////////////////////////////

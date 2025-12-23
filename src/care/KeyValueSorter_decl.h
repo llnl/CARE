@@ -625,13 +625,13 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             // Allocate new arrays for the unique elements
             host_device_ptr<KeyType> newKeys(newSize, "newKeys");
             host_device_ptr<ValueType> newValues(newSize, "newValues");
-            
+
             // Copy unique elements to their new positions
             CARE_STREAM_LOOP(i, 0, m_len) {
                if (isUnique[i]) {
                   int pos = positions[i];
-                  newKeys[pos] = m_keys[i];
-                  newValues[pos] = m_values[i];
+                  newKeys[pos] = keys[i];
+                  newValues[pos] = values[i];
                }
             } CARE_STREAM_LOOP_END
             
@@ -934,11 +934,15 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
       , m_values(std::move(values))
       , m_keyValues(len, "m_keyValues")
       {
+         auto mkeyValues  = m_keyValues;
+         auto mkeys = m_keys;
+         auto mvalues = m_values;
+
          // Initialize m_keyValues from the provided keys and values
-         for (size_t i = 0; i < m_len; ++i) {
-            m_keyValues[i].key = m_keys[i];
-            m_keyValues[i].value = m_values[i];
-         }
+         CARE_SEQUENTIAL_LOOP(i, 0, m_len) {
+            mkeyValues[i].key = mkeys[i];
+            mkeyValues[i].value = mvalues[i];
+         } CARE_SEQUENTIAL_LOOP_END
       }
 
       ///////////////////////////////////////////////////////////////////////////
@@ -1323,16 +1327,17 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
             // Create a new array to hold the unique pairs
             host_device_ptr<_kv<KeyType, ValueType>> uniquePairs(m_len, "uniquePairs");
             // Copy the first element
-            uniquePairs[0] = m_keyValues[0];
+            uniquePairs.set(0, m_keyValues.pick(0));
             // Copy only non-duplicate elements
             size_t newSize = 1;
-            for (size_t i = 1; i < m_len; ++i) {
-               if (m_keyValues[i].key != m_keyValues[i-1].key ||
-                  m_keyValues[i].value != m_keyValues[i-1].value) {
-                  uniquePairs[newSize] = m_keyValues[i];
+            auto keyValues  = m_keyValues;
+            CARE_SEQUENTIAL_REF_LOOP(i, 1, m_len, newSize) {
+               if (keyValues[i].key != keyValues[i-1].key ||
+                  keyValues[i].value != keyValues[i-1].value) {
+                  uniquePairs[newSize] = keyValues[i];
                   ++newSize;
                }
-            }
+            } CARE_SEQUENTIAL_REF_LOOP_END
             
             // Free the original key value pairs
             m_keyValues.free();

@@ -64,6 +64,7 @@ CARE_INLINE int CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & ar
          ArrayCopy(exec, arr, reinterpret_cast<care::host_device_ptr<const T> &>(tmp), numKept);
          tmp.free();
       }
+      return numKept;
    }
    else if (listType == care::compress_array::mapping_list) {
       care::host_device_ptr<T> tmp(arrLen, "CompressArray tmp");
@@ -134,9 +135,17 @@ CARE_INLINE int CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & ar
          ArrayCopy(exec, arr, reinterpret_cast<care::host_device_ptr<const T> &>(tmp), numKept);
          tmp.free();
       }
+
+      keepIndices.free();
+
       return numKept;
       
-      keepIndices.free();
+   }
+   else {
+#ifdef CARE_DEBUG
+      printf("Warning in CompressArray<T>: unsupported compressArray mode!\n");
+#endif
+      return -1;
    }
 }
 
@@ -251,6 +260,13 @@ CARE_INLINE int CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, co
       if (realloc) {
          arr.realloc(numKept);
       }
+      return numKept;
+   }
+   else {
+#ifdef CARE_DEBUG
+      printf("Warning in CompressArray<T>: unsupported compressArray mode!\n");
+#endif
+      return -1;
    }
 }
 

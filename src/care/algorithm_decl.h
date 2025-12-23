@@ -172,7 +172,7 @@ ReturnType ArraySum(care::host_device_ptr<const T> arr, int n, T initVal);
 template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
 ReturnType ArraySumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> subset, int n, T initVal);
 
-template<typename T, typename Exec=RAJAExec, typename ReturnType=T>
+template<typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
 ReturnType SumArrayOrArraySubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const>  subset, int n);
 
 template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
