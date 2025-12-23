@@ -14,6 +14,13 @@ The format of this file is based on [Keep a Changelog](http://keepachangelog.com
 
 ## [Version 0.15.3] - Release date 2025-12-22
 
+### Added
+- Added support to `care::KeyValueSorter` for sorting by both key and value.
+
+### Changed
+- Algorithms returning a sum were changed to allow returning a different type to avoid integer overflow.
+- Extended `care::CompressArray` to allow providing a list of indices to keep or to remove.
+
 ### Fixed
 - Removed template arguments when declaring special member functions of a template class. They are unnecessary and even disallowed by some compilers.
 - Fixed several chunked loop macros.
