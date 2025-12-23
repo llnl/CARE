@@ -21,6 +21,7 @@
 #include "care/CHAIDataGetter.h"
 #include "care/DefaultMacros.h"
 #include "care/scan.h"
+#include "care/compress_algorithm_impl.h"
 
 // Other library headers
 #if defined(__CUDACC__)
@@ -863,162 +864,6 @@ CARE_INLINE void sort_uniq(Exec e, care::host_device_ptr<T> * array, int * len, 
 }
 
 /************************************************************************
-* Function  : CompressArray<T>
-* Author(s) : Peter Robinson, Benjamin Liu
-* Purpose   : Compress an array based on list of array indices.
-*             Based on listType, the list is either
-*             removed_list: a list of indices to remove
-*                or
-*             mapping_list: a mapping from compressed indices to original indices.
-*             All entries in list must be > 0 and < arrLen.
-*             If the realloc parameter is true, arr will be resized/reallocated to
-*             the compressed size.
-*             Thread safe version of CompressArray.
-*             Note that thread safe version only requires list to be sorted,
-*             and only if listType == removed_list is true.
-**************************************************************************/
-#ifdef CARE_PARALLEL_DEVICE
-template <typename T>
-CARE_INLINE void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & arr, const int arrLen,
-                               care::host_device_ptr<int const> list, const int listLen,
-                               const care::compress_array listType, bool realloc)
-{
-   //GPU VERSION
-   if (listType == care::compress_array::removed_list) {
-      care::host_device_ptr<T> tmp(arrLen-listLen, "CompressArray_tmp");
-      int numKept = 0;
-      SCAN_LOOP(i, 0, arrLen, pos, numKept,
-                -1 == BinarySearch<int>(list, 0, listLen, i)) {
-         tmp[pos] = arr[i];
-      } SCAN_LOOP_END(arrLen, pos, numKept)
-
-#ifdef CARE_DEBUG
-      int numRemoved = arrLen - numKept;
-      if (listLen != numRemoved) {
-         printf("Warning in CompressArray<T>: did not remove expected number of members!\n");
-      }
-#endif
-      if (realloc) {
-         arr.free();
-         arr = tmp;
-      }
-      else {
-         ArrayCopy(exec, arr, reinterpret_cast<care::host_device_ptr<const T> &>(tmp), numKept);
-         tmp.free();
-      }
-   }
-   else {
-      care::host_device_ptr<T> tmp(arrLen, "CompressArray tmp");
-      ArrayCopy<T>(tmp, arr, arrLen);
-      if (realloc) {
-         arr.realloc(listLen) ;
-      }
-      CARE_STREAM_LOOP(newIndex, 0, listLen) {
-         int oldIndex = list[newIndex] ;
-         arr[newIndex] = tmp[oldIndex] ;
-      } CARE_STREAM_LOOP_END
-      tmp.free();
-   }
-}
-
-#endif // defined(CARE_PARALLEL_DEVICE)
-
-/************************************************************************
-* Function  : CompressArray<T>
-* Author(s) : Peter Robinson, Benjamin Liu
-* Purpose   : Compress an array based on list of array indices.
-*             Based on listType, the list is either
-*             removed_list: a list of indices to remove
-*                or
-*             mapping_list: a mapping from compressed indices to original indices.
-*             All entries in list must be > 0 and < arrLen.
-*             If the realloc parameter is true, arr will be resized/reallocated to
-*             the compressed size.
-*             Sequential Version of CompressArray
-*             Requires both arr and list to be sorted.
-**************************************************************************/
-template <typename T>
-CARE_INLINE void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, const int arrLen,
-                               care::host_device_ptr<int const> list, const int listLen,
-                               const care::compress_array listType, bool realloc)
-{
-   // CPU VERSION
-   if (listType == care::compress_array::removed_list) {
-      int readLoc;
-      int writeLoc = 0, numRemoved = 0;
-      care::host_ptr<int const> listHost = list ;
-      care::host_ptr<T> arrHost = arr ;
-#ifdef CARE_DEBUG
-      if (listHost[listLen-1] > arrLen-1) {
-         printf("Warning in CompressArray<T> seq_exec: asking to remove entries not in array!\n");
-      }
-#endif
-      for (readLoc = 0; readLoc < arrLen; ++readLoc) {
-         if ((numRemoved == listLen) || (readLoc < listHost[numRemoved])) {
-            arrHost[writeLoc++] = arrHost[readLoc];
-         }
-         else if (readLoc == listHost[numRemoved]) {
-            ++numRemoved;
-         }
-#ifdef CARE_DEBUG
-         else {
-            printf("Warning in CompressArray<int> seq_exec: list of removed members not sorted!\n");
-         }
-#endif
-      }
-#ifdef CARE_DEBUG
-      if ((listLen != numRemoved) || (writeLoc != arrLen - listLen)) {
-         printf("CompressArray<T> seq_exec: did not remove expected number of members!\n");
-      }
-#endif
-      if (realloc) {
-         arr.realloc(arrLen - listLen) ;
-      }
-   }
-   else {
-      CARE_SEQUENTIAL_LOOP(newIndex, 0, listLen) {
-         int oldIndex = list[newIndex] ;
-#ifdef CARE_DEBUG
-         if (oldIndex > arrLen-1 || oldIndex < 0) {
-            printf("Warning in CompressArray<T> seq_exec: asking to remove entries not in array!\n");
-         }
-#endif
-         arr[newIndex] = arr[oldIndex] ;
-      } CARE_SEQUENTIAL_LOOP_END
-      if (realloc) {
-         arr.realloc(listLen) ;
-      }
-   }
-}
-
-/************************************************************************
-* Function  : CompressArray<T>
-* Author(s) : Peter Robinson, Benjamin Liu
-* Purpose   : Compress an array based on list of array indices.
-*             Based on listType, the list is either
-*             removed_list: a list of indices to remove
-*                or
-*             mapping_list: a mapping from compressed indices to original indices.
-*             All entries in list must be > 0 and < arrLen.
-*             If the realloc parameter is true, arr will be resized/reallocated to
-*             the compressed size.
-*             Both arr and list should be sorted to support the sequential
-*             implementation.
-**************************************************************************/
-template <typename T>
-CARE_INLINE void CompressArray(care::host_device_ptr<T> & arr, const int arrLen,
-                               care::host_device_ptr<int const> list, const int listLen,
-                               const care::compress_array listType, bool realloc)
-{
-#ifdef CARE_DEBUG
-   checkSorted<T>(arr, arrLen, "CompressArray", "arr") ;
-   checkSorted<int>(list, listLen, "CompressArray", "list") ;
-#endif
-   return CompressArray(RAJAExec(), arr, arrLen, list, listLen, listType, realloc);
-}
-
-
-/************************************************************************
  * Function  : uniqLocal
  * Author(s) : Benjamin Liu
  * Purpose   : Remove duplicates in-place from an array that is sorted
@@ -1438,15 +1283,15 @@ CARE_INLINE int ArrayCount(care::host_device_ptr<const T> arr, int length, T val
  * Author(s) : Peter Robinson
  * Purpose   : Returns the sum of all values in a ManagedArray
  * ************************************************************************/
-template <typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArraySum(care::host_device_ptr<const T> arr, int n, T initVal)
+template <typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArraySum(care::host_device_ptr<const T> arr, int n, T initVal)
 {
    ReduceType iVal = initVal;
    RAJAReduceSum<ReduceType> sum { iVal };
    CARE_REDUCE_LOOP(k, 0, n) {
       sum += arr[k];
    } CARE_REDUCE_LOOP_END
-   return (T) (ReduceType) sum;
+   return (ReturnType) (ReduceType) sum;
 }
 
 /************************************************************************
@@ -1455,8 +1300,8 @@ CARE_INLINE T ArraySum(care::host_device_ptr<const T> arr, int n, T initVal)
  * Purpose   : Returns the sum of values in arr at indices in subset.
  * Note      : length n refers to length of subset, not array
  * ************************************************************************/
-template <typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArraySumSubset(care::host_device_ptr<const T> arr,
+template <typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArraySumSubset(care::host_device_ptr<const T> arr,
                              care::host_device_ptr<int const> subset, int n, T initVal)
 {
    ReduceType iVal = initVal;
@@ -1464,7 +1309,7 @@ CARE_INLINE T ArraySumSubset(care::host_device_ptr<const T> arr,
    CARE_REDUCE_LOOP(k, 0, n) {
       sum += arr[subset[k]];
    } CARE_REDUCE_LOOP_END
-   return (T) (ReduceType) sum;
+   return (ReturnType) (ReduceType) sum;
 }
 
 /************************************************************************
@@ -1472,8 +1317,8 @@ CARE_INLINE T ArraySumSubset(care::host_device_ptr<const T> arr,
  * Author(s) : Peter Robinson
  * Purpose   : Returns the sum of values in arr at indices in subset.
  * ************************************************************************/
-template <typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,  
+template <typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,  
                                    care::host_device_ptr<int const> mask,
                                    care::host_device_ptr<int const> subset,
                                    int n, T initVal)
@@ -1486,7 +1331,7 @@ CARE_INLINE T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,
          sum += arr[ndx];
       }
    } CARE_REDUCE_LOOP_END
-   return (T) (ReduceType) sum;
+   return (ReturnType) (ReduceType) sum;
 }
 
 /************************************************************************
@@ -1494,8 +1339,8 @@ CARE_INLINE T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr,
  * Author(s) : Peter Robinson
  * Purpose   : Returns the sum of values in arr at indices where mask is 0.
  * ************************************************************************/
-template<typename T, typename ReduceType, typename Exec>
-CARE_INLINE T ArrayMaskedSum(care::host_device_ptr<const T> arr,
+template<typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType ArrayMaskedSum(care::host_device_ptr<const T> arr,
                              care::host_device_ptr<int const> mask,
                              int n, T initVal)
 {
@@ -1506,7 +1351,7 @@ CARE_INLINE T ArrayMaskedSum(care::host_device_ptr<const T> arr,
       sum += arr[i] * T(mask[i] == 0);
    } CARE_STREAM_LOOP_END
 
-   return (T) (ReduceType) sum ;
+   return (ReturnType) (ReduceType) sum ;
 }
 
 /************************************************************************
@@ -1690,15 +1535,15 @@ CARE_INLINE care::host_device_ptr<T> ArrayDup(RAJA::seq_exec, const T* from, int
 // SumIntArray.
 // @author Peter Robinson
 //
-template<typename T, typename Exec>
-CARE_INLINE T SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
+template<typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
                                     care::host_device_ptr<int const> subset, int n)
 {
    if (subset) {
-      return ArraySumSubset<T, T, Exec>(arr, subset, n, T(0));
+      return ArraySumSubset<T, ReduceType, Exec, ReturnType>(arr, subset, n, T(0));
    }
    else {
-      return ArraySum<T, T, Exec>(arr, n, T(0));
+      return ArraySum<T, ReduceType, Exec, ReturnType>(arr, n, T(0));
    }
 }
 
@@ -1710,21 +1555,21 @@ CARE_INLINE T SumArrayOrArraySubset(care::host_device_ptr<const T> arr,
 // @param mask Array of same length as arr
 // @param subset Array of length n.
 //
-template<typename T, typename ReduceType, typename Exec>
-CARE_INLINE T PickAndPerformSum(care::host_device_ptr<const T> arr,
+template<typename T, typename ReduceType, typename Exec, typename ReturnType>
+CARE_INLINE ReturnType PickAndPerformSum(care::host_device_ptr<const T> arr,
                                 care::host_device_ptr<int const> mask,
                                 care::host_device_ptr<int const> subset, int n)
 {
    if (mask) {
       if (subset) {
-         return ArrayMaskedSumSubset<T, ReduceType, Exec>(arr, mask, subset, n, T(0));
+         return ArrayMaskedSumSubset<T, ReduceType, Exec, ReturnType>(arr, mask, subset, n, T(0));
       }
       else {
-         return ArrayMaskedSum<T, ReduceType, Exec>(arr, mask, n, T(0));
+         return ArrayMaskedSum<T, ReduceType, Exec, ReturnType>(arr, mask, n, T(0));
       }
    }
    else {
-      return SumArrayOrArraySubset<T, Exec>(arr, subset, n);
+      return SumArrayOrArraySubset<T, ReduceType, Exec, ReturnType>(arr, subset, n);
    }
 }
 

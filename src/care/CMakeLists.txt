@@ -24,6 +24,7 @@ set(care_headers
     ArrayView.h
     atomic.h
     care_inst.h
+    compress_algorithm_impl.h
     CHAICallback.h
     CHAIDataGetter.h
     GPUWatchpoint.h
