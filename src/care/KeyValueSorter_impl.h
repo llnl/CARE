@@ -238,10 +238,12 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
    auto * rawKeyResult = keyGetter.getRawArrayData(keyResult);
    auto * rawValueResult = valueGetter.getRawArrayData(valueResult);
 
-   auto custom_comparator = [] CARE_HOST_DEVICE (decltype(*rawKeyData) lhs, decltype(*rawKeyData) rhs) {
+   using RawKeyType = std::remove_reference_t<decltype(*rawKeyData)>;
+
+   auto custom_comparator = [] CARE_HOST_DEVICE (const RawKeyType& lhs,
+                                                 const RawKeyType& rhs) {
       return lhs < rhs;
    };
-
 
    // Get the temp storage length
    char * d_temp_storage = nullptr;

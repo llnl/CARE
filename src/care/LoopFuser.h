@@ -642,21 +642,21 @@ class LoopFuser : public FusedActions {
       ///        in the event that a user wants to maintain multiple independent
       ///        LoopFuser objects.
       ///////////////////////////////////////////////////////////////////////////
-      CARE_DLL_API LoopFuser<REGISTER_COUNT, XARGS...>(allocator);
+      CARE_DLL_API LoopFuser(allocator);
 
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Peter Robinson
       /// @brief The destructor.
       ///////////////////////////////////////////////////////////////////////////
-      CARE_DLL_API ~LoopFuser<REGISTER_COUNT, XARGS...>();
+      CARE_DLL_API ~LoopFuser();
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Peter Robinson
       /// @brief gets a static singleton instance of a LoopFuser.
       /// @return The default instance.
       ///////////////////////////////////////////////////////////////////////////
-      CARE_DLL_API static LoopFuser<REGISTER_COUNT, XARGS...> * getInstance();
+      CARE_DLL_API static LoopFuser* getInstance();
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Peter Robinson

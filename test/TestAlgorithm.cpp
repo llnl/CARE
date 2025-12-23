@@ -274,8 +274,9 @@ TEST(algorithm, compressarray)
       removed[i] = i ;
    } CARE_SEQUENTIAL_LOOP_END
 
-   care::CompressArray<int>(RAJA::seq_exec(), a, size, removed, removedLen, care::compress_array::removed_list, true) ;
+   int newSize = care::CompressArray<int>(RAJA::seq_exec(), a, size, removed, removedLen, care::compress_array::removed_list, true);
 
+   EXPECT_EQ(newSize, size-removedLen);
    CARE_SEQUENTIAL_LOOP(i, 0, size-removedLen) {
       EXPECT_EQ(a[i], 100 + (i + removedLen));
    } CARE_SEQUENTIAL_LOOP_END
@@ -298,14 +299,55 @@ TEST(algorithm, compressarray)
       mapList[i] = i + 3 ;
    } CARE_SEQUENTIAL_LOOP_END
 
-   care::CompressArray<int>(RAJA::seq_exec(), b, size, mapList, newLen, care::compress_array::mapping_list, true) ;
+   newSize = care::CompressArray<int>(RAJA::seq_exec(), b, size, mapList, newLen, care::compress_array::mapping_list, true);
 
+   EXPECT_EQ(newSize, newLen);
    CARE_SEQUENTIAL_LOOP(i, 0, newLen) {
       EXPECT_EQ(b[i], 100 + (i+3));
    } CARE_SEQUENTIAL_LOOP_END
 
    b.free();
    mapList.free();
+   
+   // Test CompressArray with remove_flag_list mode
+   care::host_device_ptr<int> c(size, "c");
+   care::host_device_ptr<int> removeFlags(size, "removeFlags");
+
+   CARE_SEQUENTIAL_LOOP(i, 0, size) {
+      c[i] = 100 + i;
+      // Remove even indices
+      removeFlags[i] = (i % 2 == 0) ? 1 : 0;
+   } CARE_SEQUENTIAL_LOOP_END
+
+   newSize = care::CompressArray<int>(RAJA::seq_exec(), c, size, removeFlags, size, care::compress_array::remove_flag_list, true);
+
+   EXPECT_EQ(newSize, size/2);
+   CARE_SEQUENTIAL_LOOP(i, 0, size/2) {
+      EXPECT_EQ(c[i], 100 + (i*2 + 1));
+   } CARE_SEQUENTIAL_LOOP_END
+
+   c.free();
+   removeFlags.free();
+   
+   // Test CompressArray with keep_flag_list mode
+   care::host_device_ptr<int> d(size, "d");
+   care::host_device_ptr<int> keepFlags(size, "keepFlags");
+
+   CARE_SEQUENTIAL_LOOP(i, 0, size) {
+      d[i] = 100 + i;
+      // Keep odd indices
+      keepFlags[i] = (i % 2 == 1) ? 1 : 0;
+   } CARE_SEQUENTIAL_LOOP_END
+
+   newSize = care::CompressArray<int>(RAJA::seq_exec(), d, size, keepFlags, size, care::compress_array::keep_flag_list, true);
+
+   EXPECT_EQ(newSize, size/2);
+   CARE_SEQUENTIAL_LOOP(i, 0, size/2) {
+      EXPECT_EQ(d[i], 100 + (i*2 + 1));
+   } CARE_SEQUENTIAL_LOOP_END
+
+   d.free();
+   keepFlags.free();
 }
 
 #if defined(CARE_GPUCC)
@@ -2054,8 +2096,9 @@ GPU_TEST(algorithm, compressarray)
       removed[i] = i ;
    } CARE_STREAM_LOOP_END
 
-   care::CompressArray<int>(RAJAExec(), a, size, removed, removedLen, care::compress_array::removed_list, true) ;
+   int newSize = care::CompressArray<int>(RAJADeviceExec(), a, size, removed, removedLen, care::compress_array::removed_list, true);
 
+   EXPECT_EQ(newSize, size-removedLen);
    CARE_SEQUENTIAL_LOOP(i, 0, size-removedLen) {
       EXPECT_EQ(a[i], 100 + (i + removedLen));
    } CARE_SEQUENTIAL_LOOP_END
@@ -2078,16 +2121,154 @@ GPU_TEST(algorithm, compressarray)
       mapList[i] = i + 3 ;
    } CARE_STREAM_LOOP_END
 
-   care::CompressArray<int>(RAJAExec(), b, size, mapList, newLen, care::compress_array::mapping_list, true) ;
+   newSize = care::CompressArray<int>(RAJADeviceExec(), b, size, mapList, newLen, care::compress_array::mapping_list, true);
 
+   EXPECT_EQ(newSize, newLen);
    CARE_SEQUENTIAL_LOOP(i, 0, newLen) {
       EXPECT_EQ(b[i], 100 + (i+3));
    } CARE_SEQUENTIAL_LOOP_END
 
    b.free();
    mapList.free();
+   
+   // Test CompressArray with remove_flag_list mode
+   care::host_device_ptr<int> c(size, "c");
+   care::host_device_ptr<int> removeFlags(size, "removeFlags");
+
+   CARE_STREAM_LOOP(i, 0, size) {
+      c[i] = 100 + i;
+      // Remove even indices
+      removeFlags[i] = (i % 2 == 0) ? 1 : 0;
+   } CARE_STREAM_LOOP_END
+
+   newSize = care::CompressArray<int>(RAJADeviceExec(), c, size, removeFlags, size, care::compress_array::remove_flag_list, true);
+
+   EXPECT_EQ(newSize, size/2);
+   CARE_SEQUENTIAL_LOOP(i, 0, size/2) {
+      EXPECT_EQ(c[i], 100 + (i*2 + 1));
+   } CARE_SEQUENTIAL_LOOP_END
+
+   c.free();
+   removeFlags.free();
+   
+   // Test CompressArray with keep_flag_list mode
+   care::host_device_ptr<int> d(size, "d");
+   care::host_device_ptr<int> keepFlags(size, "keepFlags");
+
+   CARE_STREAM_LOOP(i, 0, size) {
+      d[i] = 100 + i;
+      // Keep odd indices
+      keepFlags[i] = (i % 2 == 1) ? 1 : 0;
+   } CARE_STREAM_LOOP_END
+
+   newSize = care::CompressArray<int>(RAJADeviceExec(), d, size, keepFlags, size, care::compress_array::keep_flag_list, true);
+
+   EXPECT_EQ(newSize, size/2);
+   CARE_SEQUENTIAL_LOOP(i, 0, size/2) {
+      EXPECT_EQ(d[i], 100 + (i*2 + 1));
+   } CARE_SEQUENTIAL_LOOP_END
+
+   d.free();
+   keepFlags.free();
 }
 
-
 #endif // CARE_GPUCC
+
+#if defined(CARE_GPUCC)
+GPU_TEST(algorithm, array_return_type)
+{
+   // Test ArraySum with different return type
+   int size = 5;
+   care::host_device_ptr<bool> boolArray(size, "boolArray");
+   
+   CARE_STREAM_LOOP(i, 0, size) {
+      boolArray[i] = (i % 2 == 0); // true for even indices, false for odd
+   } CARE_STREAM_LOOP_END
+   
+   // Sum bool array but return int
+   int sum = care::ArraySum<bool, int, RAJADeviceExec, int>(boolArray, size, false);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   // Test ArraySumSubset with different return type
+   care::host_device_ptr<int> subset(3, "subset");
+   
+   CARE_STREAM_LOOP(i, 0, 3) {
+      subset[i] = i * 2; // Select indices 0, 2, 4
+   } CARE_STREAM_LOOP_END
+   
+   // Sum subset of bool array but return int
+   sum = care::ArraySumSubset<bool, int, RAJADeviceExec, int>(boolArray, subset, 3, false);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   // Test SumArrayOrArraySubset with different return type
+   sum = care::SumArrayOrArraySubset<bool, int, RAJADeviceExec, int>(boolArray, nullptr, size);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   sum = care::SumArrayOrArraySubset<bool, int, RAJADeviceExec, int>(boolArray, subset, 3);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   // Test PickAndPerformSum with different return type
+   care::host_device_ptr<int> mask(size, "mask");
+   
+   CARE_STREAM_LOOP(i, 0, size) {
+      mask[i] = (i < 3) ? 0 : 1; // Mask out indices 3 and 4
+   } CARE_STREAM_LOOP_END
+   
+   sum = care::PickAndPerformSum<bool, int, RAJADeviceExec, int>(boolArray, mask, nullptr, size);
+   EXPECT_EQ(sum, 2); // Should count 2 true values (indices 0, 2)
+   
+   boolArray.free();
+   subset.free();
+   mask.free();
+}
+#endif // CARE_GPUCC
+
+// Test for the new ReturnType template parameter in array functions
+TEST(algorithm, array_return_type)
+{
+   // Test ArraySum with different return type
+   int size = 5;
+   care::host_device_ptr<bool> boolArray(size, "boolArray");
+   
+   CARE_SEQUENTIAL_LOOP(i, 0, size) {
+      boolArray[i] = (i % 2 == 0); // true for even indices, false for odd
+   } CARE_SEQUENTIAL_LOOP_END
+   
+   // Sum bool array but return int
+   int sum = care::ArraySum<bool, int, RAJA::seq_exec, int>(boolArray, size, false);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   // Test ArraySumSubset with different return type
+   care::host_device_ptr<int> subset(3, "subset");
+   
+   CARE_SEQUENTIAL_LOOP(i, 0, 3) {
+      subset[i] = i * 2; // Select indices 0, 2, 4
+   } CARE_SEQUENTIAL_LOOP_END
+   
+   // Sum subset of bool array but return int
+   sum = care::ArraySumSubset<bool, int, RAJA::seq_exec, int>(boolArray, subset, 3, false);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   // Test SumArrayOrArraySubset with different return type
+   sum = care::SumArrayOrArraySubset<bool, int, RAJA::seq_exec, int>(boolArray, nullptr, size);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   sum = care::SumArrayOrArraySubset<bool, int,  RAJA::seq_exec, int>(boolArray, subset, 3);
+   EXPECT_EQ(sum, 3); // Should count 3 true values (indices 0, 2, 4)
+   
+   // Test PickAndPerformSum with different return type
+   care::host_device_ptr<int> mask(size, "mask");
+   
+   CARE_SEQUENTIAL_LOOP(i, 0, size) {
+      mask[i] = (i < 3) ? 0 : 1; // Mask out indices 3 and 4
+   } CARE_SEQUENTIAL_LOOP_END
+   
+   sum = care::PickAndPerformSum<bool, int, RAJA::seq_exec, int>(boolArray, mask, nullptr, size);
+   EXPECT_EQ(sum, 2); // Should count 2 true values (indices 0, 2)
+   
+   boolArray.free();
+   subset.free();
+   mask.free();
+}
+
 
