@@ -882,7 +882,12 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, int, double) ;
-// TODO GID not implemented
+CARE_EXTERN template CARE_DLL_API
+double ArraySum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, int, double) ;
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySum<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -894,6 +899,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySum<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySum<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, int, double) ;
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySum<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, int, globalID) ;
+#endif
 // TODO GID not implemented
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -908,7 +917,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySumSubset<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySumSubset<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySumSubset<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -920,7 +932,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySumSubset<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySumSubset<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySumSubset<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -934,7 +949,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSumSubset<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSumSubset<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSumSubset<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -946,7 +964,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSumSubset<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSumSubset<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSumSubset<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -960,7 +981,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSum<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -972,7 +996,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSum<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSum<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSum<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
