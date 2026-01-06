@@ -882,8 +882,6 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, int, double) ;
-CARE_EXTERN template CARE_DLL_API
-double ArraySum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, int, double) ;
 #if CARE_HAVE_LLNL_GLOBALID
 CARE_EXTERN template CARE_DLL_API
 globalID ArraySum<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, int, globalID) ;
