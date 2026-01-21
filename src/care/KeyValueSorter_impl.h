@@ -38,7 +38,35 @@
 namespace care {
 
 // TODO openMP parallel implementation
-#if defined(CARE_PARALLEL_DEVICE) || CARE_ENABLE_GPU_SIMULATION_MODE
+
+namespace detail {
+template <typename KeyT, typename ValueT>
+CARE_INLINE void stableSortKeyValuePairs(host_device_ptr<KeyT> & keys,
+                                         host_device_ptr<ValueT> & values,
+                                         const size_t len,
+                                         const size_t start=0) 
+{
+   host_device_ptr<_kv<KeyT,ValueT>> keyValues(len);
+
+   CARE_STREAM_LOOP(i, 0, (int) len) {
+      keyValues[i].key = keys[i+start];
+      keyValues[i].value = values[i+start];
+   } CARE_STREAM_LOOP_END
+
+   CHAIDataGetter<_kv<KeyT, ValueT>, RAJA::seq_exec> getter {};
+   _kv<KeyT, ValueT> * rawData = getter.getRawArrayData(keyValues);
+   std::stable_sort(rawData, rawData + len, cmpKeys<_kv<KeyT,ValueT>>);
+
+   CARE_STREAM_LOOP(i, 0, (int) len) {
+      keys[i+start] = keyValues[i].key;
+      values[i+start] = keyValues[i].value;
+   } CARE_STREAM_LOOP_END
+
+   keyValues.free();
+}
+
+} // namespace detail
+
 
 // TODO: Use if constexpr and std::is_arithmetic_v when c++17 support is required
 
@@ -164,32 +192,12 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
    }
 
 #else // defined(CARE_GPUCC)
-
-   host_device_ptr<_kv<KeyT,ValueT>> keyValues(len);
-
-   CARE_STREAM_LOOP(i, 0, (int) len) {
-      keyValues[i].key = keys[i+start];
-      keyValues[i].value = values[i+start];
-   } CARE_STREAM_LOOP_END
-
-   // Now sort
-
-   CHAIDataGetter<_kv<KeyT, ValueT>, RAJA::seq_exec> getter {};
-   _kv<KeyT, ValueT> * rawData = getter.getRawArrayData(keyValues);
-   std::stable_sort(rawData, rawData + len, cmpKeys<_kv<KeyT,ValueT>>);
-
-   CARE_STREAM_LOOP(i, 0, (int) len) {
-      keys[i+start] = keyValues[i].key;
-      values[i+start] = keyValues[i].value;
-   } CARE_STREAM_LOOP_END
-
-   keyValues.free();
-
+// fall back to an implementation that uses std::stable_sort on the host
+   detail::stableSortKeyValuePairs(keys, values, len, start);
 #endif // defined(CARE_GPUCC)
 
 }
 
-#if defined(__HIPCC__) || (defined(__CUDACC__) && defined(CUB_MAJOR_VERSION) && defined(CUB_MINOR_VERSION) && (CUB_MAJOR_VERSION >= 2 || (CUB_MAJOR_VERSION == 1 && CUB_MINOR_VERSION >= 14))) || defined(_OPENMP) || CARE_ENABLE_GPU_SIMULATION_MODE
 ///////////////////////////////////////////////////////////////////////////
 /// @author Peter Robinson, Alan Dayton
 /// @brief ManagedArray API to cub::DeviceRadixSort::SortPairs
@@ -305,33 +313,15 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
    }
 
 #else // defined(CARE_GPUCC)
-
-   host_device_ptr<_kv<KeyT,ValueT>> keyValues(len);
-
-   CARE_STREAM_LOOP(i, 0, (int) len) {
-      keyValues[i].key = keys[i+start];
-      keyValues[i].value = values[i+start];
-   } CARE_STREAM_LOOP_END
-
-   // Now sort
-
-   CHAIDataGetter<_kv<KeyT, ValueT>, RAJA::seq_exec> getter {};
-   _kv<KeyT, ValueT> * rawData = getter.getRawArrayData(keyValues);
-   std::stable_sort(rawData, rawData + len, cmpKeys<_kv<KeyT,ValueT>>);
-
-   CARE_STREAM_LOOP(i, 0, (int) len) {
-      keys[i+start] = keyValues[i].key;
-      values[i+start] = keyValues[i].value;
-   } CARE_STREAM_LOOP_END
-
-   keyValues.free();
+   // fall back to an implementation that uses std::stable_sort on the host
+   detail::stableSortKeyValuePairs(keys, values, len, start);
 
 #endif // defined(CARE_GPUCC)
 
 }
 
-#endif
 
+#if defined(CARE_PARALLEL_DEVICE) || CARE_ENABLE_GPU_SIMULATION_MODE
 ///////////////////////////////////////////////////////////////////////////
 /// @author Benjamin Liu after Alan Dayton
 /// @brief Initializes keys and values by copying elements from the array
@@ -759,4 +749,3 @@ CARE_INLINE void IntersectKeyValueSorters(RAJA::seq_exec /* exec */,
 } // namespace care
 
 #endif // !defined(_CARE_KEY_VALUE_SORTER_IMPL_H_)
-

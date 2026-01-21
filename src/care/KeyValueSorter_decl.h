@@ -43,7 +43,6 @@ template <typename KeyType, typename ValueType, typename Exec>
 using LocalKeyValueSorter = KeyValueSorter<KeyType, ValueType, Exec> ;
 
 
-#if defined(CARE_PARALLEL_DEVICE) || CARE_ENABLE_GPU_SIMULATION_MODE
 
 ///////////////////////////////////////////////////////////////////////////
 /// @author Peter Robinson, Alan Dayton
@@ -66,15 +65,16 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
                    const size_t start, const size_t len,
                    const bool noCopy=false);
 
-#if defined(__HIPCC__) || (defined(__CUDACC__) && defined(CUB_MAJOR_VERSION) && defined(CUB_MINOR_VERSION) && (CUB_MAJOR_VERSION >= 2 || (CUB_MAJOR_VERSION == 1 && CUB_MINOR_VERSION >= 14))) || defined(_OPENMP) || CARE_ENABLE_GPU_SIMULATION_MODE
+
 template <typename Exec, typename KeyT, typename ValueT>
 std::enable_if_t<!std::is_arithmetic<typename CHAIDataGetter<KeyT, RAJADeviceExec>::raw_type>::value, void>
 sortKeyValueArrays(host_device_ptr<KeyT> & keys,
                    host_device_ptr<ValueT> & values,
                    const size_t start, const size_t len,
                    const bool noCopy=false);
-#endif
 
+
+#if defined(CARE_PARALLEL_DEVICE) || CARE_ENABLE_GPU_SIMULATION_MODE
 ///////////////////////////////////////////////////////////////////////////
 /// @author Benjamin Liu after Alan Dayton
 /// @brief Initializes keys and values by copying elements from the array
