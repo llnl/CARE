@@ -11,6 +11,8 @@
 // CARE config header
 #include "care/config.h"
 
+#include <cstdint>
+
 #ifdef CARE_ENABLE_EXTERN_INSTANTIATE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,6 +44,10 @@
 
 #define CARE_TEMPLATE_KEY_TYPE int
 #define CARE_TEMPLATE_ARRAY_TYPE double
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE int64_t
+#define CARE_TEMPLATE_ARRAY_TYPE int64_t
 #include "care/KeyValueSorter_inst.h"
 
 #if CARE_HAVE_LLNL_GLOBALID

@@ -86,7 +86,7 @@ CARE_INLINE void stableSortKeyValuePairs(host_device_ptr<KeyT> & keys,
 ///////////////////////////////////////////////////////////////////////////
 template <typename Exec, typename KeyT, typename ValueT>
 CARE_INLINE
-std::enable_if_t<std::is_arithmetic<typename CHAIDataGetter<KeyT, RAJADeviceExec>::raw_type>::value, void>
+std::enable_if_t<std::is_arithmetic<typename CHAIDataGetter<KeyT, Exec>::raw_type>::value, void>
 sortKeyValueArrays(host_device_ptr<KeyT> & keys,
                    host_device_ptr<ValueT> & values,
                    const size_t start, const size_t len,
@@ -214,7 +214,7 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
 ///////////////////////////////////////////////////////////////////////////
 template <typename Exec, typename KeyT, typename ValueT>
 CARE_INLINE
-std::enable_if_t<!std::is_arithmetic<typename CHAIDataGetter<KeyT, RAJADeviceExec>::raw_type>::value, void>
+std::enable_if_t<!std::is_arithmetic<typename CHAIDataGetter<KeyT, Exec>::raw_type>::value, void>
 sortKeyValueArrays(host_device_ptr<KeyT> & keys,
                    host_device_ptr<ValueT> & values,
                    const size_t start, const size_t len,
