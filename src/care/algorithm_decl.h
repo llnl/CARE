@@ -115,8 +115,8 @@ T ArrayMaxLoc(care::host_device_ptr<const T> arr, int n, T initVal, int & loc);
 template <typename T>
 int ArrayFind(care::host_device_ptr<const T> arr, const int len, const T val, const int start = 0) ;
 
-template<typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T PickAndPerformSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n);
+template<typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType PickAndPerformSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n);
 
 template<typename T, typename Exec=RAJAExec>
 int FindIndexMinAboveThresholds(care::host_device_ptr<const T> arr, int n,
@@ -166,20 +166,20 @@ int PickAndPerformFindMaxIndex(care::host_device_ptr<const T> arr,
 template <typename T, typename Exec=RAJAExec>
 int ArrayCount(care::host_device_ptr<const T> arr, int length, T val);
 
-template <typename T, typename ReducerType=T, typename Exec=RAJAExec>
-T ArraySum(care::host_device_ptr<const T> arr, int n, T initVal);
+template <typename T, typename ReducerType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArraySum(care::host_device_ptr<const T> arr, int n, T initVal);
 
-template <typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T ArraySumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> subset, int n, T initVal);
+template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArraySumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> subset, int n, T initVal);
 
-template<typename T, typename Exec=RAJAExec>
-T SumArrayOrArraySubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const>  subset, int n);
+template<typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType SumArrayOrArraySubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const>  subset, int n);
 
-template <typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T ArrayMaskedSumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n, T initVal);
+template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArrayMaskedSumSubset(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, care::host_device_ptr<int const> subset, int n, T initVal);
 
-template <typename T, typename ReduceType=T, typename Exec=RAJAExec>
-T ArrayMaskedSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, int n, T initVal);
+template <typename T, typename ReduceType=T, typename Exec=RAJAExec, typename ReturnType=T>
+ReturnType ArrayMaskedSum(care::host_device_ptr<const T> arr, care::host_device_ptr<int const> mask, int n, T initVal);
 
 template <typename T, typename Exec=RAJAExec>
 int FindIndexGT(care::host_device_ptr<const T> arr, int n, T limit);
@@ -364,19 +364,19 @@ int uniqArray(RAJADeviceExec exec, care::host_device_ptr<T> & Array, size_t len,
 template <typename T, typename Exec>
 void sort_uniq(Exec e, care::host_device_ptr<T> * array, int * len, bool noCopy = false);
 
-enum class compress_array { removed_list, mapping_list };
+enum class compress_array { removed_list, mapping_list, remove_flag_list, keep_flag_list };
 
 template <typename T>
-void CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, const int arrLen,
-                   care::host_device_ptr<int const> list, const int listLen, const care::compress_array listType, bool realloc=false);
+int CompressArray(RAJA::seq_exec, care::host_device_ptr<T> & arr, const int arrLen,
+                    care::host_device_ptr<int const> list, const int listLen, const care::compress_array listType, bool realloc=false);
 #ifdef CARE_PARALLEL_DEVICE
 template <typename T>
-void CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & arr, const int arrLen,
-                   care::host_device_ptr<int const> list, const int listLen, const care::compress_array listType, bool realloc=false);
+int CompressArray(RAJADeviceExec exec, care::host_device_ptr<T> & arr, const int arrLen,
+                    care::host_device_ptr<int const> list, const int listLen, const care::compress_array listType, bool realloc=false);
 #endif // defined(CARE_PARALLEL_DEVICE)
 template <typename T>
-void CompressArray(care::host_device_ptr<T> & arr, const int arrLen,
-                   care::host_device_ptr<int const> list, const int listLen, const care::compress_array listType, bool realloc=false);
+int CompressArray(care::host_device_ptr<T> & arr, const int arrLen,
+                    care::host_device_ptr<int const> list, const int listLen, const care::compress_array listType, bool realloc=false);
 
 template <typename T>
 CARE_HOST_DEVICE void InsertionSort(care::local_ptr<T> array, int len);
@@ -496,4 +496,3 @@ void ExpandArrayInPlace(RAJADeviceExec, care::host_device_ptr<T> array, care::ho
 } // end namespace care
 
 #endif // !defined(CARE_ALGORITHM_DECL_H)
-

@@ -12,11 +12,19 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Release date yyyy-mm-dd
+## [Version 0.15.3] - Release date 2025-12-22
+
+### Added
+- Added support to `care::KeyValueSorter` for sorting by both key and value.
+
+### Changed
+- Algorithms returning a sum were changed to allow returning a different type to avoid integer overflow.
+- Extended `care::CompressArray` to allow providing a list of indices to keep or to remove.
 
 ### Fixed
 - Removed template arguments when declaring special member functions of a template class. They are unnecessary and even disallowed by some compilers.
-- Fixes for chunked managed pointer and chunked openmp loop macros
+- Fixed several chunked loop macros.
+- Fixed comparison function passed to cub/hipcub.
 
 ## [Version 0.15.2] - Release date 2025-09-15
 
