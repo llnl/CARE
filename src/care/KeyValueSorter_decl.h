@@ -1491,9 +1491,7 @@ void IntersectKeyValueSorters(RAJADeviceExec exec, KeyValueSorter<KeyType, Value
                               int & numMatches) ;
 #endif // defined(CARE_PARALLEL_DEVICE)
 
-// This assumes arrays have been sorted and unique. If they are not uniqued the GPU
-// and CPU versions may have different behaviors (the index they match to may be different, 
-// with the GPU implementation matching whatever binary search happens to land on, and the// CPU version matching the first instance. 
+// This assumes arrays have been sorted.
 
 template <typename KeyType, typename ValueType>
 void IntersectKeyValueSorters(RAJA::seq_exec exec, 

@@ -468,7 +468,17 @@ CARE_INLINE void IntersectKeyValueSorters(RAJADeviceExec exec,
    host_device_ptr<int> searches{smaller+1};
    host_device_ptr<int> matched{smaller+1};
    CARE_STREAM_LOOP(i, 0, smaller+1) {
-      searches[i] = i != smaller ? care::BinarySearch<ValueType>(largerArray, largeStart, larger, smallerArray[i+smallStart]) : -1;
+      if (i == smaller) {
+         searches[i] = -1;
+      }
+      else {
+         // to be consistent with CPU algorithm, find the first match
+         int match = care::BinarySearch<ValueType>(largerArray, largeStart, larger, smallerArray[i+smallStart]);
+         while (match > largeStart && largerArray[match-1] == largerArray[match]) {
+            --match;
+         }
+         searches[i] = match;
+      }
       matched[i] = i != smaller && searches[i] > -1;
    } CARE_STREAM_LOOP_END
 
