@@ -31,7 +31,7 @@ variables:
   # Note: we repeat the reservation, helpful when jobs are manually re-triggered.
   MATRIX_JOB_ALLOC: "--partition=pdebug --overlap --nodes=1"
   # Project specific variants for matrix
-  PROJECT_MATRIX_VARIANTS: "+cuda cuda_arch=75"
+  PROJECT_MATRIX_VARIANTS: "+cuda cuda_arch=90"
   # Project specific deps for matrix
   PROJECT_MATRIX_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
 
