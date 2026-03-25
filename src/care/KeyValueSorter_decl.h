@@ -46,7 +46,7 @@ using LocalKeyValueSorter = KeyValueSorter<KeyType, ValueType, Exec> ;
 
 ///////////////////////////////////////////////////////////////////////////
 /// @author Peter Robinson, Alan Dayton
-/// @brief ManagedArray API to cub::DeviceRadixSort::SortPairs
+/// @brief ManagedArray API for sorting paired key and value arrays
 /// @param[in, out] keys   - The array to sort
 /// @param[in, out] values - The array that is sorted simultaneously
 /// @param[in]      start  - The index to start sorting at
