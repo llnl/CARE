@@ -68,8 +68,6 @@ CARE_INLINE void stableSortKeyValuePairs(host_device_ptr<KeyT> & keys,
 } // namespace detail
 
 
-// TODO: Use if constexpr and std::is_arithmetic_v when c++17 support is required
-
 ///////////////////////////////////////////////////////////////////////////
 /// @author Peter Robinson, Alan Dayton
 /// @brief ManagedArray API for sorting paired key and value arrays
@@ -101,101 +99,105 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
       _noCopy = noCopy;
    }
 
-   // TODO openMP parallel implementation
-#ifdef CARE_GPUCC
-
-   // Allocate space for the result
-   host_device_ptr<KeyT> keyResult{len};
-   host_device_ptr<ValueT> valueResult{len};
-
-   // Get the raw data to pass to cub
-   CHAIDataGetter<KeyT, Exec> keyGetter {};
-   CHAIDataGetter<ValueT, Exec> valueGetter {};
-
-   auto * rawKeyData = keyGetter.getRawArrayData(keys) + start;
-   auto * rawValueData = valueGetter.getRawArrayData(values) + start;
-
-   auto * rawKeyResult = keyGetter.getRawArrayData(keyResult);
-   auto * rawValueResult = valueGetter.getRawArrayData(valueResult);
-
-   // Get the temp storage length
-   char * d_temp_storage = nullptr;
-   size_t temp_storage_bytes = 0;
-
-   // When called with a nullptr for temp storage, this returns how much
-   // temp storage should be allocated.
-   if (len > 0) {
-#if defined(__CUDACC__)
-      cub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData, rawKeyResult,
-                                      rawValueData, rawValueResult,
-                                      len);
-#elif defined(__HIPCC__)
-      hipcub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData, rawKeyResult,
-                                      rawValueData, rawValueResult,
-                                      len);
-#endif
-   }
-
-   // Allocate the temp storage and get raw data to pass to cub
-   host_device_ptr<char> tmpManaged {temp_storage_bytes};
-
-   CHAIDataGetter<char, Exec> charGetter {};
-   d_temp_storage = charGetter.getRawArrayData(tmpManaged);
-
-   // Now sort
-   if (len > 0) {
-#if defined(CHAI_THIN_GPU_ALLOCATE)
-      chai::ArrayManager::getInstance()->setExecutionSpace(chai::GPU);
-#endif
-
-#if defined(__CUDACC__)
-      cub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData, rawKeyResult,
-                                      rawValueData, rawValueResult,
-                                      len);
-#elif defined(__HIPCC__)
-      hipcub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData, rawKeyResult,
-                                      rawValueData, rawValueResult,
-                                      len);
-#endif
-
-#if defined(CHAI_THIN_GPU_ALLOCATE)
-      chai::ArrayManager::getInstance()->setExecutionSpace(chai::NONE);
-#endif
-
-      tmpManaged.free();
-   }
-
-   // Get the result
-   if (_noCopy) {
-      if (len > 0) {
-         keys.free();
-         values.free();
-      }
-
-      keys = keyResult;
-      values = valueResult;
+   if constexpr (std::is_same_v<Exec, RAJA::seq_exec>) {
+      detail::stableSortKeyValuePairs(keys, values, len, start);
    }
    else {
-      CARE_STREAM_LOOP(i, 0, len) {
-         keys[i+start] = keyResult[i];
-         values[i+start] = valueResult[i];
-      } CARE_STREAM_LOOP_END
+      // TODO openMP parallel implementation
+#ifdef CARE_GPUCC
 
+      // Allocate space for the result
+      host_device_ptr<KeyT> keyResult{len};
+      host_device_ptr<ValueT> valueResult{len};
+
+      // Get the raw data to pass to cub
+      CHAIDataGetter<KeyT, Exec> keyGetter {};
+      CHAIDataGetter<ValueT, Exec> valueGetter {};
+
+      auto * rawKeyData = keyGetter.getRawArrayData(keys) + start;
+      auto * rawValueData = valueGetter.getRawArrayData(values) + start;
+
+      auto * rawKeyResult = keyGetter.getRawArrayData(keyResult);
+      auto * rawValueResult = valueGetter.getRawArrayData(valueResult);
+
+      // Get the temp storage length
+      char * d_temp_storage = nullptr;
+      size_t temp_storage_bytes = 0;
+
+      // When called with a nullptr for temp storage, this returns how much
+      // temp storage should be allocated.
       if (len > 0) {
-         keyResult.free();
-         valueResult.free();
+#if defined(__CUDACC__)
+         cub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                         rawKeyData, rawKeyResult,
+                                         rawValueData, rawValueResult,
+                                         len);
+#elif defined(__HIPCC__)
+         hipcub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                            rawKeyData, rawKeyResult,
+                                            rawValueData, rawValueResult,
+                                            len);
+#endif
       }
-   }
+
+      // Allocate the temp storage and get raw data to pass to cub
+      host_device_ptr<char> tmpManaged {temp_storage_bytes};
+
+      CHAIDataGetter<char, Exec> charGetter {};
+      d_temp_storage = charGetter.getRawArrayData(tmpManaged);
+
+      // Now sort
+      if (len > 0) {
+#if defined(CHAI_THIN_GPU_ALLOCATE)
+         chai::ArrayManager::getInstance()->setExecutionSpace(chai::GPU);
+#endif
+
+#if defined(__CUDACC__)
+         cub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                         rawKeyData, rawKeyResult,
+                                         rawValueData, rawValueResult,
+                                         len);
+#elif defined(__HIPCC__)
+         hipcub::DeviceRadixSort::SortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                            rawKeyData, rawKeyResult,
+                                            rawValueData, rawValueResult,
+                                            len);
+#endif
+
+#if defined(CHAI_THIN_GPU_ALLOCATE)
+         chai::ArrayManager::getInstance()->setExecutionSpace(chai::NONE);
+#endif
+
+         tmpManaged.free();
+      }
+
+      // Get the result
+      if (_noCopy) {
+         if (len > 0) {
+            keys.free();
+            values.free();
+         }
+
+         keys = keyResult;
+         values = valueResult;
+      }
+      else {
+         CARE_STREAM_LOOP(i, 0, len) {
+            keys[i+start] = keyResult[i];
+            values[i+start] = valueResult[i];
+         } CARE_STREAM_LOOP_END
+
+         if (len > 0) {
+            keyResult.free();
+            valueResult.free();
+         }
+      }
 
 #else // defined(CARE_GPUCC)
-// fall back to an implementation that uses std::stable_sort on the host
-   detail::stableSortKeyValuePairs(keys, values, len, start);
+      // fall back to an implementation that uses std::stable_sort on the host
+      detail::stableSortKeyValuePairs(keys, values, len, start);
 #endif // defined(CARE_GPUCC)
-
+   }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -229,95 +231,99 @@ sortKeyValueArrays(host_device_ptr<KeyT> & keys,
       _noCopy = noCopy;
    }
 
-   // TODO openMP parallel implementation
+   if constexpr (std::is_same_v<Exec, RAJA::seq_exec>) {
+      detail::stableSortKeyValuePairs(keys, values, len, start);
+   }
+   else {
+      // TODO openMP parallel implementation
 #ifdef CARE_GPUCC
 
-   // Allocate space for the result
-   host_device_ptr<KeyT> keyResult{len};
-   host_device_ptr<ValueT> valueResult{len};
+      // Allocate space for the result
+      host_device_ptr<KeyT> keyResult{len};
+      host_device_ptr<ValueT> valueResult{len};
 
-   // Get the raw data to pass to cub
-   CHAIDataGetter<KeyT, Exec> keyGetter {};
-   CHAIDataGetter<ValueT, Exec> valueGetter {};
+      // Get the raw data to pass to cub
+      CHAIDataGetter<KeyT, Exec> keyGetter {};
+      CHAIDataGetter<ValueT, Exec> valueGetter {};
 
-   auto * rawKeyData = keyGetter.getRawArrayData(keys) + start;
-   auto * rawValueData = valueGetter.getRawArrayData(values) + start;
+      auto * rawKeyData = keyGetter.getRawArrayData(keys) + start;
+      auto * rawValueData = valueGetter.getRawArrayData(values) + start;
 
-   auto * rawKeyResult = keyGetter.getRawArrayData(keyResult);
-   auto * rawValueResult = valueGetter.getRawArrayData(valueResult);
+      auto * rawKeyResult = keyGetter.getRawArrayData(keyResult);
+      auto * rawValueResult = valueGetter.getRawArrayData(valueResult);
 
-   using RawKeyType = std::remove_reference_t<decltype(*rawKeyData)>;
+      using RawKeyType = std::remove_reference_t<decltype(*rawKeyData)>;
 
-   auto custom_comparator = [] CARE_HOST_DEVICE (const RawKeyType& lhs,
-                                                 const RawKeyType& rhs) {
-      return lhs < rhs;
-   };
+      auto custom_comparator = [] CARE_HOST_DEVICE (const RawKeyType& lhs,
+                                                    const RawKeyType& rhs) {
+         return lhs < rhs;
+      };
 
-   // Get the temp storage length
-   char * d_temp_storage = nullptr;
-   size_t temp_storage_bytes = 0;
+      // Get the temp storage length
+      char * d_temp_storage = nullptr;
+      size_t temp_storage_bytes = 0;
 
-   // When called with a nullptr for temp storage, this returns how much
-   // temp storage should be allocated.
-   if (len > 0) {
+      // When called with a nullptr for temp storage, this returns how much
+      // temp storage should be allocated.
+      if (len > 0) {
 #if defined(__CUDACC__)
-      cub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData,
-                                      rawValueData,
-                                      len, custom_comparator);
+         cub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                               rawKeyData,
+                                               rawValueData,
+                                               len, custom_comparator);
 #elif defined(__HIPCC__)
-      hipcub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData,
-                                      rawValueData,
-                                      len, custom_comparator);
+         hipcub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                                  rawKeyData,
+                                                  rawValueData,
+                                                  len, custom_comparator);
 #endif
-   }
+      }
 
-   // Allocate the temp storage and get raw data to pass to cub
-   host_device_ptr<char> tmpManaged {temp_storage_bytes};
+      // Allocate the temp storage and get raw data to pass to cub
+      host_device_ptr<char> tmpManaged {temp_storage_bytes};
 
-   CHAIDataGetter<char, Exec> charGetter {};
-   d_temp_storage = charGetter.getRawArrayData(tmpManaged);
+      CHAIDataGetter<char, Exec> charGetter {};
+      d_temp_storage = charGetter.getRawArrayData(tmpManaged);
 
-   // Now sort
-   if (len > 0) {
+      // Now sort
+      if (len > 0) {
 #if defined(CHAI_THIN_GPU_ALLOCATE)
-      chai::ArrayManager::getInstance()->setExecutionSpace(chai::GPU);
+         chai::ArrayManager::getInstance()->setExecutionSpace(chai::GPU);
 #endif
 
 #if defined(__CUDACC__)
-      cub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData,
-                                      rawValueData,
-                                      len,
-                                      custom_comparator);
+         cub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                               rawKeyData,
+                                               rawValueData,
+                                               len,
+                                               custom_comparator);
 #elif defined(__HIPCC__)
-      hipcub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
-                                      rawKeyData,
-                                      rawValueData,
-                                      len,
-                                      custom_comparator);
+         hipcub::DeviceMergeSort::StableSortPairs((void *)d_temp_storage, temp_storage_bytes,
+                                                  rawKeyData,
+                                                  rawValueData,
+                                                  len,
+                                                  custom_comparator);
 #endif
 
 #if defined(CHAI_THIN_GPU_ALLOCATE)
-      chai::ArrayManager::getInstance()->setExecutionSpace(chai::NONE);
+         chai::ArrayManager::getInstance()->setExecutionSpace(chai::NONE);
 #endif
 
-      tmpManaged.free();
-   }
+         tmpManaged.free();
+      }
 
-   // merge sort did an inplace sort, so the answer is already in keys and Values
-   if (len > 0) {
-      keyResult.free();
-      valueResult.free();
-   }
+      // merge sort did an inplace sort, so the answer is already in keys and Values
+      if (len > 0) {
+         keyResult.free();
+         valueResult.free();
+      }
 
 #else // defined(CARE_GPUCC)
-   // fall back to an implementation that uses std::stable_sort on the host
-   detail::stableSortKeyValuePairs(keys, values, len, start);
+      // fall back to an implementation that uses std::stable_sort on the host
+      detail::stableSortKeyValuePairs(keys, values, len, start);
 
 #endif // defined(CARE_GPUCC)
-
+   }
 }
 
 
