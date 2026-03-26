@@ -57,6 +57,10 @@
 #include "care/KeyValueSorter_inst.h"
 
 #define CARE_TEMPLATE_KEY_TYPE globalID
+#define CARE_TEMPLATE_ARRAY_TYPE int
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE globalID
 #define CARE_TEMPLATE_ARRAY_TYPE globalID
 #include "care/KeyValueSorter_inst.h"
 
