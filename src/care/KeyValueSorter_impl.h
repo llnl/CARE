@@ -48,19 +48,19 @@ CARE_INLINE void stableSortKeyValuePairs(host_device_ptr<KeyT> & keys,
 {
    host_device_ptr<_kv<KeyT,ValueT>> keyValues(len);
 
-   CARE_STREAM_LOOP(i, 0, (int) len) {
+   CARE_SEQUENTIAL_LOOP(i, 0, (int) len) {
       keyValues[i].key = keys[i+start];
       keyValues[i].value = values[i+start];
-   } CARE_STREAM_LOOP_END
+   } CARE_SEQUENTIAL_LOOP_END
 
    CHAIDataGetter<_kv<KeyT, ValueT>, RAJA::seq_exec> getter {};
    _kv<KeyT, ValueT> * rawData = getter.getRawArrayData(keyValues);
    std::stable_sort(rawData, rawData + len, cmpKeys<_kv<KeyT,ValueT>>);
 
-   CARE_STREAM_LOOP(i, 0, (int) len) {
+   CARE_SEQUENTIAL_LOOP(i, 0, (int) len) {
       keys[i+start] = keyValues[i].key;
       values[i+start] = keyValues[i].value;
-   } CARE_STREAM_LOOP_END
+   } CARE_SEQUENTIAL_LOOP_END
 
    keyValues.free();
 }
