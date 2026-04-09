@@ -20,17 +20,33 @@
 #define CARE_TEMPLATE_ARRAY_TYPE int
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE int
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
+#include "care/KeyValueSorter_inst.h"
+
 #define CARE_TEMPLATE_KEY_TYPE size_t
 #define CARE_TEMPLATE_ARRAY_TYPE float
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE float
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
 #include "care/KeyValueSorter_inst.h"
 
 #define CARE_TEMPLATE_KEY_TYPE size_t
 #define CARE_TEMPLATE_ARRAY_TYPE double
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE double
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
+#include "care/KeyValueSorter_inst.h"
+
 #if CARE_HAVE_LLNL_GLOBALID
 #define CARE_TEMPLATE_KEY_TYPE size_t
 #define CARE_TEMPLATE_ARRAY_TYPE globalID
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE globalID
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
 #include "care/KeyValueSorter_inst.h"
 #endif
 
@@ -42,8 +58,16 @@
 #define CARE_TEMPLATE_ARRAY_TYPE float
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE float
+#define CARE_TEMPLATE_ARRAY_TYPE int
+#include "care/KeyValueSorter_inst.h"
+
 #define CARE_TEMPLATE_KEY_TYPE int
 #define CARE_TEMPLATE_ARRAY_TYPE double
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE double
+#define CARE_TEMPLATE_ARRAY_TYPE int
 #include "care/KeyValueSorter_inst.h"
 
 #define CARE_TEMPLATE_KEY_TYPE int64_t
