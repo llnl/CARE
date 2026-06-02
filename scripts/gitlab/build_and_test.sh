@@ -115,22 +115,22 @@ then
 
     if [[ -n ${camp_version} ]]
     then
-        extra_deps="${extra_deps} ^camp@${camp_version}"
+        extra_deps="${extra_deps} ^camp@git.${camp_version}=main"
     fi
 
     if [[ -n ${umpire_version} ]]
     then
-        extra_deps="${extra_deps} ^umpire@${umpire_version}"
+        extra_deps="${extra_deps} ^umpire@git.${umpire_version}=develop"
     fi
 
     if [[ -n ${raja_version} ]]
     then
-        extra_deps="${extra_deps} ^raja@${raja_version}"
+        extra_deps="${extra_deps} ^raja@git.${raja_version}=develop"
     fi
 
     if [[ -n ${chai_version} ]]
     then
-        extra_deps="${extra_deps} ^chai@${chai_version}"
+        extra_deps="${extra_deps} ^chai@git.${chai_version}=develop"
     fi
 
     [[ -n ${extra_deps} ]] && spec="${spec} ${extra_deps}"
