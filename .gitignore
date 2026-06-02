@@ -7,3 +7,5 @@ hc-*
 *.orig
 *.vscode
 spack-*.txt
+slirp.out
+.codex
