@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##############################################################################
 
-set(COMPILER_BASE "/usr/tce/packages/intel/intel-2022.1.0-magic" CACHE PATH "")
+set(COMPILER_BASE "/usr/tce/packages/intel/intel-2025.2.0-magic" CACHE PATH "")
 set(CMAKE_C_COMPILER "${COMPILER_BASE}/bin/icx" CACHE PATH "")
 set(CMAKE_CXX_COMPILER "${COMPILER_BASE}/bin/icpx" CACHE PATH "")
 

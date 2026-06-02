@@ -10,7 +10,10 @@ set(CMAKE_C_COMPILER "${COMPILER_BASE}/bin/clang" CACHE PATH "")
 set(CMAKE_CXX_COMPILER "${COMPILER_BASE}/bin/clang++" CACHE PATH "")
 
 set(GCC_HOME "/usr/tce/packages/gcc/gcc-13.3.1-magic" CACHE PATH "")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --gcc-toolchain=${GCC_HOME}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --gcc-toolchain=${GCC_HOME}" CACHE STRING "")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --gcc-toolchain=${GCC_HOME} -fsanitize=undefined -fno-omit-frame-pointer" CACHE STRING "")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --gcc-toolchain=${GCC_HOME} -fsanitize=undefined -fno-omit-frame-pointer" CACHE STRING "")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined" CACHE STRING "")
+set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "")
 
 set(BLT_EXPORT_THIRDPARTY OFF CACHE BOOL "")
+
