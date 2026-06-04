@@ -1,6 +1,6 @@
 ##############################################################################
-# Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-# project contributors. See the CARE LICENSE file for details.
+# Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+# contributors. See the CARE LICENSE and COPYRIGHT files for details.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 ##############################################################################
@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CARE'
-copyright = u'2020-2025, Peter Robinson, Ben Liu, Alan Dayton, Arlie Capps, Al Nichols'
+copyright = u'2020-2026, Lawrence Livermore National Security, LLC and other CARE contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
