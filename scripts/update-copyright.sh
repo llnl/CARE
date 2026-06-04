@@ -10,6 +10,7 @@
 set -euo pipefail
 
 NEW_END_YEAR="2026"
+echo "Updating copyright end year to ${NEW_END_YEAR}"
 
 for file in "LICENSE" "docs/sphinx/conf.py"; do
     echo "$file"
