@@ -7,7 +7,7 @@ then
 fi
 
 ###############################################################################
-# Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
+# Copyright (c) 2020-26, Lawrence Livermore National Security, LLC and CARE
 # project contributors. See the CARE LICENSE file for details.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -385,7 +385,7 @@ then
     section_start "clean" "Cleaning working directory" "collapsed"
 
     # Map CPU core allocations
-    declare -A core_counts=(["lassen"]=40 ["poodle"]=28 ["dane"]=28 ["corona"]=32 ["rzansel"]=48 ["tioga"]=32 ["tuolumne"]=48 ["matrix"]=48)
+    declare -A core_counts=(["dane"]=28 ["matrix"]=28 ["corona"]=32 ["rzansel"]=48 ["tioga"]=32 ["tuolumne"]=48)
 
     # If building, then delete everything first
     # NOTE: 'cmake --build . -j core_counts' attempts to reduce individual build resources.
@@ -414,7 +414,14 @@ then
         section_end
     else
         status=$?
-        section_end ; print_error "CMake configuration failed"
+        section_end ; print_error "CMake configuration failed, dumping output..."
+
+        $cmake_exe \
+          -C ${hostconfig_path} \
+          ${cmake_options} \
+          -DCMAKE_INSTALL_PREFIX=${install_dir} \
+          ${project_dir} --debug-output --trace-expand
+
         exit ${status}
     fi
 
