@@ -22,7 +22,7 @@ variables:
   # Note: we repeat the reservation, helpful when jobs are manually re-triggered.
   DANE_JOB_ALLOC: "--overlap --reservation=ci --nodes=1"
   # Project specific variants for dane
-  PROJECT_DANE_VARIANTS: "cxxstd=20"
+  PROJECT_DANE_VARIANTS: " cxxstd=20"
   # Project specific deps for dane
   PROJECT_DANE_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
 
@@ -31,7 +31,7 @@ variables:
   # Note: we repeat the reservation, helpful when jobs are manually re-triggered.
   MATRIX_JOB_ALLOC: "--partition=pdebug --overlap --nodes=1"
   # Project specific variants for matrix
-  PROJECT_MATRIX_VARIANTS: "cxxstd=20 +cuda cuda_arch=90"
+  PROJECT_MATRIX_VARIANTS: " cxxstd=20 +cuda cuda_arch=90"
   # Project specific deps for matrix
   PROJECT_MATRIX_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
 
@@ -39,7 +39,7 @@ variables:
   CORONA_SHARED_ALLOC: "--exclusive --time-limit=20m --nodes=1"
   CORONA_JOB_ALLOC: "--nodes=1 --begin-time=+5s"
   # Project specific variants for corona
-  PROJECT_CORONA_VARIANTS: "cxxstd=20"
+  PROJECT_CORONA_VARIANTS: " cxxstd=20"
   # Project specific deps for corona
   PROJECT_CORONA_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
 
@@ -47,7 +47,7 @@ variables:
   TIOGA_SHARED_ALLOC: "--queue=pci --exclusive --time-limit=20m --nodes=1"
   TIOGA_JOB_ALLOC: "--nodes=1 --begin-time=+5s"
   # Project specific variants for tioga
-  PROJECT_TIOGA_VARIANTS: "cxxstd=20"
+  PROJECT_TIOGA_VARIANTS: " cxxstd=20"
   # Project specific deps for tioga
   PROJECT_TIOGA_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
 
@@ -55,6 +55,6 @@ variables:
   TUOLUMNE_SHARED_ALLOC: "--queue=pci --exclusive --time-limit=20m --nodes=1"
   TUOLUMNE_JOB_ALLOC: "--nodes=1 --begin-time=+5s"
   # Project specific variants for tuolumne
-  PROJECT_TUOLUMNE_VARIANTS: "cxxstd=20"
+  PROJECT_TUOLUMNE_VARIANTS: " cxxstd=20"
   # Project specific deps for tuolumne
   PROJECT_TUOLUMNE_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
