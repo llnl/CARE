@@ -12,6 +12,13 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Release date yyyy-mm-dd
+
+### Changed
+- C++20 or higher is required.
+- CUDA 12 or higher is required.
+- ROCm 6 or higher is required.
+
 ## [Version 0.15.3] - Release date 2025-12-22
 
 ### Added
