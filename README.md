@@ -33,8 +33,16 @@ By default, only the tests are built. Documentation, benchmarks, and examples ca
 
 License
 =======
-CARE is release under the BSD-3-Clause License. See the LICENSE and NOTICE files for more details.
+CARE is licensed under the [BSD 3-Clause license](https://opensource.org/licenses/BSD-3-Clause).
 
+Unlimited Open Source - BSD 3-clause Distribution
 SPDX-License-Identifier: BSD-3-Clause
+`LLNL-CODE-809741`
 
-LLNL-CODE-809741
+Copyrights and patents in the CARE project are retained by contributors.
+No copyright assignment is required to contribute to CARE.
+
+For release details and restrictions, please see the information in the
+following:
+- [COPYRIGHT](./COPYRIGHT)
+- [LICENSE](./LICENSE)
