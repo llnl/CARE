@@ -24,7 +24,7 @@ variables:
   # Project specific variants for dane
   PROJECT_DANE_VARIANTS: " cxxstd=20"
   # Project specific deps for dane
-  PROJECT_DANE_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
+  PROJECT_DANE_DEPS: "^chai~shared~examples ^raja~examples~exercises~tests ^umpire~c~shared ^fmt@12.1.0"
 
   # Matrix (SLURM) allocation settings
   MATRIX_SHARED_ALLOC: "--exclusive --partition=pdebug --time=10 --nodes=1"
@@ -33,7 +33,7 @@ variables:
   # Project specific variants for matrix
   PROJECT_MATRIX_VARIANTS: " cxxstd=20 +cuda cuda_arch=90"
   # Project specific deps for matrix
-  PROJECT_MATRIX_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
+  PROJECT_MATRIX_DEPS: "^chai~shared~examples ^raja~examples~exercises~tests ^umpire~c~shared ^fmt@12.1.0"
 
   # Corona (flux) allocation settings
   CORONA_SHARED_ALLOC: "--exclusive --time-limit=20m --nodes=1"
@@ -41,7 +41,7 @@ variables:
   # Project specific variants for corona
   PROJECT_CORONA_VARIANTS: " cxxstd=20"
   # Project specific deps for corona
-  PROJECT_CORONA_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
+  PROJECT_CORONA_DEPS: "^chai~shared~examples ^raja~examples~exercises~tests ^umpire~c~shared ^fmt@12.1.0"
 
   # Tioga (flux) allocation settings
   TIOGA_SHARED_ALLOC: "--queue=pci --exclusive --time-limit=20m --nodes=1"
@@ -49,7 +49,7 @@ variables:
   # Project specific variants for tioga
   PROJECT_TIOGA_VARIANTS: " cxxstd=20"
   # Project specific deps for tioga
-  PROJECT_TIOGA_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
+  PROJECT_TIOGA_DEPS: "^chai~shared~examples ^raja~examples~exercises~tests ^umpire~c~shared ^fmt@12.1.0"
 
   # Tuolumne (flux) allocation settings
   TUOLUMNE_SHARED_ALLOC: "--queue=pci --exclusive --time-limit=20m --nodes=1"
@@ -57,4 +57,4 @@ variables:
   # Project specific variants for tuolumne
   PROJECT_TUOLUMNE_VARIANTS: " cxxstd=20"
   # Project specific deps for tuolumne
-  PROJECT_TUOLUMNE_DEPS: "^umpire~c~shared ^raja~examples~exercises~tests ^chai~shared~examples "
+  PROJECT_TUOLUMNE_DEPS: "^chai~shared~examples ^raja~examples~exercises~tests ^umpire~c~shared ^fmt@12.1.0"
