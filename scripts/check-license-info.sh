@@ -1,7 +1,8 @@
 #!/usr/bin/env zsh
+
 ##############################################################################
-# Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-# project contributors. See the CARE LICENSE file for details.
+# Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+# contributors. See the CARE LICENSE and COPYRIGHT files for details.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 ##############################################################################
@@ -15,7 +16,7 @@ RED="\033[1;31m"
 GREEN="\033[1;32m"
 NOCOLOR="\033[0m"
 
-files_no_license=$(grep -rL "Copyright.*2020-25, Lawrence Livermore National Security, LLC and CARE" . \
+files_no_license=$(grep -rL "Copyright (c) Lawrence Livermore National Security, LLC and other CARE" . \
    --exclude-dir=.git \
    --exclude-dir=blt \
    --exclude-dir=cub \
@@ -37,7 +38,7 @@ files_no_license=$(grep -rL "Copyright.*2020-25, Lawrence Livermore National Sec
    --exclude=package.py \
    --exclude=.uberenv_config.json)
 
-files_no_license+=$(grep -rL "project contributors. See the CARE LICENSE file for details." . \
+files_no_license+=$(grep -rL "contributors. See the CARE LICENSE and COPYRIGHT files for details." . \
    --exclude-dir=.git \
    --exclude-dir=blt \
    --exclude-dir=cub \
@@ -82,10 +83,10 @@ files_no_license+=$(grep -rL "SPDX-License-Identifier: BSD-3-Clause" . \
    --exclude=.uberenv_config.json)
 
 if [ $files_no_license ]; then
-  print "${RED} [!] Some files are missing license text:${NOCOLOR}"
+  print "${RED}[!] Some files are missing license text:${NOCOLOR}"
   echo "${files_no_license}"
   exit 255
 else
-  print "${GREEN} [Ok] All files have required license info.${NOCOLOR}"
+  print "${GREEN}[Ok] All files have required license info.${NOCOLOR}"
   exit 0
 fi
