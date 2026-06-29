@@ -461,8 +461,8 @@ CARE_INLINE void IntersectKeyValueSorters(RAJADeviceExec exec,
       largerMatches = matches1;
    }
 
-   host_device_ptr<int> searches{smaller+1};
-   host_device_ptr<int> matched{smaller+1};
+   host_device_ptr<int> searches(smaller+1);
+   host_device_ptr<int> matched(smaller+1);
    CARE_STREAM_LOOP(i, 0, smaller+1) {
       if (i == smaller) {
          searches[i] = -1;

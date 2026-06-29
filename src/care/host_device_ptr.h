@@ -98,6 +98,11 @@ namespace care {
       CARE_HOST_DEVICE host_device_ptr(std::nullptr_t from) noexcept : MA (from) {}
 
       ///
+      /// Construct from a size
+      ///
+      CARE_HOST_DEVICE explicit host_device_ptr(size_t count) noexcept : MA (count) {}
+
+      ///
       /// @author Peter Robinson
       ///
       /// Copy constructor
