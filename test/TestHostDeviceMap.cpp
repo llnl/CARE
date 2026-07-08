@@ -22,6 +22,7 @@ GPU_TEST(HostDeviceMap, InsertSortLookup)
    init_care_for_testing();
 
    constexpr int num_entries = 4;
+   constexpr int missing_key = 77;
    constexpr int miss_signal = -999;
    care::host_device_map<int, int, RAJAExec> map(num_entries, miss_signal);
 
@@ -39,7 +40,7 @@ GPU_TEST(HostDeviceMap, InsertSortLookup)
    } CARE_STREAM_LOOP_END
 
    CARE_STREAM_LOOP(i, num_entries, num_entries + 1) {
-      values[i] = map.at(77);
+      values[i] = map.at(missing_key);
    } CARE_STREAM_LOOP_END
 
    EXPECT_EQ(values.pick(0), 100);

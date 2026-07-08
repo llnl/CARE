@@ -246,15 +246,7 @@ namespace care {
 
          // move constructor
          CARE_HOST_DEVICE host_device_map(host_device_map&& other) noexcept
-#ifdef CARE_DEVICE_COMPILE
-            : m_size_ptr{other.m_size_ptr},
-              m_size{other.m_size},
-              m_max_size{other.m_max_size},
-              m_signal{other.m_signal},
-              m_gpu_map{other.m_gpu_map}
-#endif
          {
-#ifndef CARE_DEVICE_COMPILE
             m_max_size = other.m_max_size;
             m_signal = other.m_signal;
             m_gpu_map = std::move(other.m_gpu_map);
@@ -262,7 +254,6 @@ namespace care {
             m_size_ptr = other.m_size_ptr;
             other.m_size_ptr = nullptr;
             m_size = other.m_size;
-#endif
          }
 
          // move assignment
@@ -281,6 +272,7 @@ namespace care {
         inline CARE_HOST_DEVICE void emplace(key_type key, mapped_type val) const {
            care::local_ptr<int> size_ptr = m_size_ptr;
            int index = ATOMIC_ADD(size_ptr[0], 1);
+           // TODO: should this be removed?
            // commenting out to avoid having printfs compiled into every kernel that uses emplace
            //if (size_ptr[0] > m_max_size) {
            //   printf("[CARE] Warning: host_device_map exceeds max size %d > %d\n", size_ptr[0], m_max_size);
