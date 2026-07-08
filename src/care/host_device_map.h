@@ -245,7 +245,16 @@ namespace care {
 	 }
 
          // move constructor
-         CARE_HOST_DEVICE host_device_map(host_device_map&& other) noexcept { 
+         CARE_HOST_DEVICE host_device_map(host_device_map&& other) noexcept
+#ifdef CARE_DEVICE_COMPILE
+            : m_size_ptr{other.m_size_ptr},
+              m_size{other.m_size},
+              m_max_size{other.m_max_size},
+              m_signal{other.m_signal},
+              m_gpu_map{other.m_gpu_map}
+#endif
+         {
+#ifndef CARE_DEVICE_COMPILE
             m_max_size = other.m_max_size;
             m_signal = other.m_signal;
             m_gpu_map = std::move(other.m_gpu_map);
@@ -253,6 +262,7 @@ namespace care {
             m_size_ptr = other.m_size_ptr;
             other.m_size_ptr = nullptr;
             m_size = other.m_size;
+#endif
          }
 
          // move assignment
