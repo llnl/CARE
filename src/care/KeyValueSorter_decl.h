@@ -31,7 +31,7 @@ namespace care {
 ///    to make this GPU friendly.
 ///////////////////////////////////////////////////////////////////////////
 template <typename KeyType, typename ValueType, typename Exec=RAJAExec>
-class CARE_DLL_API KeyValueSorter;
+class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter;
 
 /// LocalKeyValueSorter should be used as the type for HOSTDEV functions
 /// to indicate that the function should only be called in a RAJA context.
@@ -127,7 +127,7 @@ size_t eliminateKeyValueDuplicates(host_device_ptr<KeyType>& newKeys,
 ///    arrays to be compatible with sortKeyValueArrays.
 ///////////////////////////////////////////////////////////////////////////
 template <typename KeyType, typename ValueType>
-class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
+class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
    public:
 
       ///////////////////////////////////////////////////////////////////////////
@@ -854,7 +854,7 @@ void initializeValueArray(host_device_ptr<ValueType>& values, const host_device_
 /// the need for copying the keys and values into separate arrays after the sort.
 ///////////////////////////////////////////////////////////////////////////
 template <typename KeyType, typename ValueType>
-class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
+class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
    public:
 
       ///////////////////////////////////////////////////////////////////////////
