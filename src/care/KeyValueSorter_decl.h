@@ -135,7 +135,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       /// @brief Default constructor
       /// @return a KeyValueSorter instance
       ///////////////////////////////////////////////////////////////////////////
-      KeyValueSorter() {}
+      CARE_HOST_DEVICE KeyValueSorter() noexcept {}
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Peter Robinson, Alan Dayton
