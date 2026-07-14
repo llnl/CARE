@@ -464,7 +464,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
          auto keys = m_keys;
          
          // Use SCAN_LOOP to identify where ranges start
-         SCAN_LOOP(i, start, start+len-1, idx, count,
+         SCAN_LOOP(i, start, start+len, idx, count,
                   (i == start) || (keys[i] != keys[i-1])) {
             rangeStarts[idx] = i;
          } SCAN_LOOP_END(len, idx, count)
