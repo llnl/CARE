@@ -47,6 +47,10 @@
 #define CARE_DLL_API
 #endif // defined(_WIN32) && !defined(CARESTATICLIB)
 
+#ifndef CARE_KEY_VALUE_SORTER_DLL_API
+#define CARE_KEY_VALUE_SORTER_DLL_API CARE_DLL_API
+#endif
+
 #define CARE_STRINGIFY(x) CARE_DO_STRINGIFY(x)
 #define CARE_DO_STRINGIFY(x) #x
 #ifdef _WIN32
