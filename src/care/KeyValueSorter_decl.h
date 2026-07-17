@@ -464,10 +464,10 @@ class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJADevic
          auto keys = m_keys;
          
          // Use SCAN_LOOP to identify where ranges start
-         SCAN_LOOP(i, start, start+len-1, idx, count,
+         SCAN_LOOP(i, start, start+len, idx, count,
                   (i == start) || (keys[i] != keys[i-1])) {
             rangeStarts[idx] = i;
-         } SCAN_LOOP_END(len, idx, count)
+         } SCAN_LOOP_END(start+len, idx, count)
 
          // Set the last range end
          rangeStarts.set(count , start+len);
@@ -617,7 +617,7 @@ class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJADevic
             
             // Use exclusive scan to compute output positions
             host_device_ptr<int> positions(m_len+1);
-            care::exclusive_scan(RAJADeviceExec{}, isUnique, positions, m_len, 0, false);
+            care::exclusive_scan(RAJADeviceExec{}, isUnique, positions, m_len + 1, 0, false);
             
             // Get the total number of unique elements
             int newSize = positions.pick(m_len);
