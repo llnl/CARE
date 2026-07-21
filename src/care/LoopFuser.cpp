@@ -170,7 +170,7 @@ template<int REGISTER_COUNT, typename...XARGS>
 void LoopFuser<REGISTER_COUNT,XARGS...>::waitIfNeeded() {
    if (m_wait_needed) {
       // ensure asynchronous launch from previous flush is done
-#if CAMP_VERSION >= 2026007000
+#if CAMP_VERSION_MAJOR >= 2026
       m_async_resource.wait_for(m_wait_for_event);
 #else
       m_async_resource.wait_for(&m_wait_for_event);
