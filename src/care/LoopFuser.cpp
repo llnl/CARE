@@ -170,7 +170,11 @@ template<int REGISTER_COUNT, typename...XARGS>
 void LoopFuser<REGISTER_COUNT,XARGS...>::waitIfNeeded() {
    if (m_wait_needed) {
       // ensure asynchronous launch from previous flush is done
+#if CAMP_VERSION >= 2026007000
+      m_async_resource.wait_for(m_wait_for_event);
+#else
       m_async_resource.wait_for(&m_wait_for_event);
+#endif
       // clear out our worksites now that their work is done
       m_aw.clear();
       m_cw.clear();
