@@ -5,9 +5,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //////////////////////////////////////////////////////////////////////////////
 
-// Loop Fuser uses the CUDA/HIP default stream and wants to enqueue events in the default stream
-#define CAMP_USE_PLATFORM_DEFAULT_STREAM 1
-
 #include "umpire/Allocator.hpp"
 #include "umpire/TypedAllocator.hpp"
 
