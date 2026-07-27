@@ -21,6 +21,7 @@
 #include "chai/ManagedArray.hpp"
 
 // Std library headers
+#include <concepts>
 #include <cstddef>
 
 
@@ -93,9 +94,16 @@ namespace care {
       ///
       /// @author Peter Robinson
       ///
-      /// nullptr constructor
+      /// Construct from nullptr
       ///
-      CARE_HOST_DEVICE host_device_ptr(std::nullptr_t from) noexcept : MA (from) {}
+      /// @note The constraint prevents overload ambiguity between this
+      ///       constructor and the size_t constructor when constructing
+      ///       with the integer literal 0. Additionally, the constraint
+      ///       is a workaround for a nvcc bug where overload resolution
+      ///       can incorrectly report an ambiguity between this constructor
+      ///       and the size_t constructor.
+      ///
+      CARE_HOST_DEVICE host_device_ptr(std::same_as<std::nullptr_t> auto from) noexcept : MA (from) {}
 
       ///
       /// Construct from a size
