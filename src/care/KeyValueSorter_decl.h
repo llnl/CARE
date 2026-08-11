@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-// project contributors. See the CARE LICENSE file for details.
+// Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+// contributors. See the CARE LICENSE and COPYRIGHT files for details.
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ namespace care {
 ///    to make this GPU friendly.
 ///////////////////////////////////////////////////////////////////////////
 template <typename KeyType, typename ValueType, typename Exec=RAJAExec>
-class CARE_DLL_API KeyValueSorter;
+class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter;
 
 /// LocalKeyValueSorter should be used as the type for HOSTDEV functions
 /// to indicate that the function should only be called in a RAJA context.
@@ -43,11 +43,10 @@ template <typename KeyType, typename ValueType, typename Exec>
 using LocalKeyValueSorter = KeyValueSorter<KeyType, ValueType, Exec> ;
 
 
-#if defined(CARE_PARALLEL_DEVICE) || CARE_ENABLE_GPU_SIMULATION_MODE
 
 ///////////////////////////////////////////////////////////////////////////
 /// @author Peter Robinson, Alan Dayton
-/// @brief ManagedArray API to cub::DeviceRadixSort::SortPairs
+/// @brief ManagedArray API for sorting paired key and value arrays
 /// @param[in, out] keys   - The array to sort
 /// @param[in, out] values - The array that is sorted simultaneously
 /// @param[in]      start  - The index to start sorting at
@@ -60,21 +59,22 @@ using LocalKeyValueSorter = KeyValueSorter<KeyType, ValueType, Exec> ;
 /// @return void
 ///////////////////////////////////////////////////////////////////////////
 template <typename Exec, typename KeyT, typename ValueT>
-std::enable_if_t<std::is_arithmetic<typename CHAIDataGetter<KeyT, RAJADeviceExec>::raw_type>::value, void>
+std::enable_if_t<std::is_arithmetic<typename CHAIDataGetter<KeyT, Exec>::raw_type>::value, void>
 sortKeyValueArrays(host_device_ptr<KeyT> & keys,
                    host_device_ptr<ValueT> & values,
                    const size_t start, const size_t len,
                    const bool noCopy=false);
 
-#if defined(__HIPCC__) || (defined(__CUDACC__) && defined(CUB_MAJOR_VERSION) && defined(CUB_MINOR_VERSION) && (CUB_MAJOR_VERSION >= 2 || (CUB_MAJOR_VERSION == 1 && CUB_MINOR_VERSION >= 14))) || defined(_OPENMP) || CARE_ENABLE_GPU_SIMULATION_MODE
+
 template <typename Exec, typename KeyT, typename ValueT>
-std::enable_if_t<!std::is_arithmetic<typename CHAIDataGetter<KeyT, RAJADeviceExec>::raw_type>::value, void>
+std::enable_if_t<!std::is_arithmetic<typename CHAIDataGetter<KeyT, Exec>::raw_type>::value, void>
 sortKeyValueArrays(host_device_ptr<KeyT> & keys,
                    host_device_ptr<ValueT> & values,
                    const size_t start, const size_t len,
                    const bool noCopy=false);
-#endif
 
+
+#if defined(CARE_PARALLEL_DEVICE) || CARE_ENABLE_GPU_SIMULATION_MODE
 ///////////////////////////////////////////////////////////////////////////
 /// @author Benjamin Liu after Alan Dayton
 /// @brief Initializes keys and values by copying elements from the array
@@ -127,7 +127,7 @@ size_t eliminateKeyValueDuplicates(host_device_ptr<KeyType>& newKeys,
 ///    arrays to be compatible with sortKeyValueArrays.
 ///////////////////////////////////////////////////////////////////////////
 template <typename KeyType, typename ValueType>
-class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
+class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
    public:
 
       ///////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
       /// @brief Default constructor
       /// @return a KeyValueSorter instance
       ///////////////////////////////////////////////////////////////////////////
-      KeyValueSorter() {}
+      CARE_HOST_DEVICE KeyValueSorter() noexcept {}
 
       ///////////////////////////////////////////////////////////////////////////
       /// @author Peter Robinson, Alan Dayton
@@ -464,10 +464,10 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
          auto keys = m_keys;
          
          // Use SCAN_LOOP to identify where ranges start
-         SCAN_LOOP(i, start, start+len-1, idx, count,
+         SCAN_LOOP(i, start, start+len, idx, count,
                   (i == start) || (keys[i] != keys[i-1])) {
             rangeStarts[idx] = i;
-         } SCAN_LOOP_END(len, idx, count)
+         } SCAN_LOOP_END(start+len, idx, count)
 
          // Set the last range end
          rangeStarts.set(count , start+len);
@@ -617,7 +617,7 @@ class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJADeviceExec> {
             
             // Use exclusive scan to compute output positions
             host_device_ptr<int> positions(m_len+1);
-            care::exclusive_scan(RAJADeviceExec{}, isUnique, positions, m_len, 0, false);
+            care::exclusive_scan(RAJADeviceExec{}, isUnique, positions, m_len + 1, 0, false);
             
             // Get the total number of unique elements
             int newSize = positions.pick(m_len);
@@ -854,7 +854,7 @@ void initializeValueArray(host_device_ptr<ValueType>& values, const host_device_
 /// the need for copying the keys and values into separate arrays after the sort.
 ///////////////////////////////////////////////////////////////////////////
 template <typename KeyType, typename ValueType>
-class CARE_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
+class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq_exec> {
    public:
 
       ///////////////////////////////////////////////////////////////////////////
@@ -1491,9 +1491,7 @@ void IntersectKeyValueSorters(RAJADeviceExec exec, KeyValueSorter<KeyType, Value
                               int & numMatches) ;
 #endif // defined(CARE_PARALLEL_DEVICE)
 
-// This assumes arrays have been sorted and unique. If they are not uniqued the GPU
-// and CPU versions may have different behaviors (the index they match to may be different, 
-// with the GPU implementation matching whatever binary search happens to land on, and the// CPU version matching the first instance. 
+// This assumes arrays have been sorted.
 
 template <typename KeyType, typename ValueType>
 void IntersectKeyValueSorters(RAJA::seq_exec exec, 

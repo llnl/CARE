@@ -1,12 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-// project contributors. See the CARE LICENSE file for details.
+// Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+// contributors. See the CARE LICENSE and COPYRIGHT files for details.
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //////////////////////////////////////////////////////////////////////////////
-
-// Loop Fuser uses the CUDA/HIP default stream and wants to enqueue events in the default stream
-#define CAMP_USE_PLATFORM_DEFAULT_STREAM 1
 
 #include "umpire/Allocator.hpp"
 #include "umpire/TypedAllocator.hpp"
@@ -170,7 +167,11 @@ template<int REGISTER_COUNT, typename...XARGS>
 void LoopFuser<REGISTER_COUNT,XARGS...>::waitIfNeeded() {
    if (m_wait_needed) {
       // ensure asynchronous launch from previous flush is done
+#if CAMP_VERSION_MAJOR >= 2026
+      m_async_resource.wait_for(m_wait_for_event);
+#else
       m_async_resource.wait_for(&m_wait_for_event);
+#endif
       // clear out our worksites now that their work is done
       m_aw.clear();
       m_cw.clear();

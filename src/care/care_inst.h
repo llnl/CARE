@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-// project contributors. See the CARE LICENSE file for details.
+// Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+// contributors. See the CARE LICENSE and COPYRIGHT files for details.
 //
 // SPDX-License-Identifier: BSD-3-Clause
 //////////////////////////////////////////////////////////////////////////////
@@ -11,6 +11,8 @@
 // CARE config header
 #include "care/config.h"
 
+#include <cstdint>
+
 #ifdef CARE_ENABLE_EXTERN_INSTANTIATE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -18,17 +20,33 @@
 #define CARE_TEMPLATE_ARRAY_TYPE int
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE int
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
+#include "care/KeyValueSorter_inst.h"
+
 #define CARE_TEMPLATE_KEY_TYPE size_t
 #define CARE_TEMPLATE_ARRAY_TYPE float
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE float
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
 #include "care/KeyValueSorter_inst.h"
 
 #define CARE_TEMPLATE_KEY_TYPE size_t
 #define CARE_TEMPLATE_ARRAY_TYPE double
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE double
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
+#include "care/KeyValueSorter_inst.h"
+
 #if CARE_HAVE_LLNL_GLOBALID
 #define CARE_TEMPLATE_KEY_TYPE size_t
 #define CARE_TEMPLATE_ARRAY_TYPE globalID
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE globalID
+#define CARE_TEMPLATE_ARRAY_TYPE size_t
 #include "care/KeyValueSorter_inst.h"
 #endif
 
@@ -40,14 +58,30 @@
 #define CARE_TEMPLATE_ARRAY_TYPE float
 #include "care/KeyValueSorter_inst.h"
 
+#define CARE_TEMPLATE_KEY_TYPE float
+#define CARE_TEMPLATE_ARRAY_TYPE int
+#include "care/KeyValueSorter_inst.h"
+
 #define CARE_TEMPLATE_KEY_TYPE int
 #define CARE_TEMPLATE_ARRAY_TYPE double
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE double
+#define CARE_TEMPLATE_ARRAY_TYPE int
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE int64_t
+#define CARE_TEMPLATE_ARRAY_TYPE int64_t
 #include "care/KeyValueSorter_inst.h"
 
 #if CARE_HAVE_LLNL_GLOBALID
 
 #define CARE_TEMPLATE_KEY_TYPE int
 #define CARE_TEMPLATE_ARRAY_TYPE globalID
+#include "care/KeyValueSorter_inst.h"
+
+#define CARE_TEMPLATE_KEY_TYPE globalID
+#define CARE_TEMPLATE_ARRAY_TYPE int
 #include "care/KeyValueSorter_inst.h"
 
 #define CARE_TEMPLATE_KEY_TYPE globalID
@@ -882,7 +916,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySum<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -894,6 +931,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySum<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySum<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, int, double) ;
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySum<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, int, globalID) ;
+#endif
 // TODO GID not implemented
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -908,7 +949,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySumSubset<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySumSubset<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySumSubset<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -920,7 +964,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArraySumSubset<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArraySumSubset<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArraySumSubset<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -934,7 +981,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSumSubset<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSumSubset<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSumSubset<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -946,7 +996,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSumSubset<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSumSubset<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSumSubset<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -960,7 +1013,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSum<float, float, RAJADeviceExec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSum<double, double, RAJADeviceExec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSum<globalID, globalID, RAJADeviceExec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 #endif // defined(CARE_PARALLEL_DEVICE)
 
@@ -972,7 +1028,10 @@ CARE_EXTERN template CARE_DLL_API
 float ArrayMaskedSum<float, float, RAJA::seq_exec>(care::host_device_ptr<const float>, care::host_device_ptr<int const>, int, float) ;
 CARE_EXTERN template CARE_DLL_API
 double ArrayMaskedSum<double, double, RAJA::seq_exec>(care::host_device_ptr<const double>, care::host_device_ptr<int const>, int, double) ;
-// TODO GID not implemented
+#if CARE_HAVE_LLNL_GLOBALID
+CARE_EXTERN template CARE_DLL_API
+globalID ArrayMaskedSum<globalID, globalID, RAJA::seq_exec>(care::host_device_ptr<const globalID>, care::host_device_ptr<int const>, int, globalID) ;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,6 @@
 ##############################################################################
-# Copyright (c) 2020-25, Lawrence Livermore National Security, LLC and CARE
-# project contributors. See the CARE LICENSE file for details.
+# Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+# contributors. See the CARE LICENSE and COPYRIGHT files for details.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 ##############################################################################
@@ -96,6 +96,19 @@ target_include_directories(TestKeyValueSorter
 
 blt_add_test( NAME TestKeyValueSorter
               COMMAND TestKeyValueSorter )
+
+blt_add_executable( NAME TestHostDeviceMap
+                    SOURCES TestHostDeviceMap.cpp
+                    DEPENDS_ON ${care_test_dependencies} )
+
+target_include_directories(TestHostDeviceMap
+                           PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(TestHostDeviceMap
+                           PRIVATE ${PROJECT_BINARY_DIR}/include)
+
+blt_add_test( NAME TestHostDeviceMap
+              COMMAND TestHostDeviceMap )
 
 if (CARE_ENABLE_MANAGED_PTR)
    blt_add_executable( NAME TestManagedPtr
