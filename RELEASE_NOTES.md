@@ -24,6 +24,7 @@ The format of this file is based on [Keep a Changelog](http://keepachangelog.com
 - C++20 or higher is required.
 - ROCm 6 or higher is required.
 - CUDA 12 or higher is required.
+- CMake 3.24 or higher is required.
 - Updated BLT to v0.7.2.
 - Updated CHAI to v2026.07.0.
 - Updated RAJA to v2026.07.0.
