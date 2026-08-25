@@ -12,10 +12,21 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - Release date yyyy-mm-dd
+
+### Added
+- Added `host_device_ptr<T>::slice` function to make passing slices easier to algorithms.
+
+### Changed
+- Inlined many device APIs to reduce the need for relocatable device code, though the LoopFuser still requires it.
+
+### Fixed
+- Fixed macro name conflict in tests.
+
 ## [Version 2026.07.0] - Release date 2026-08-11
 
 ### Added
-- Add ATOMIC\_GENERIC and ATOMIC\_GENERIC\_WITH\_STOP for new generic atomic implementations in RAJA v2026.07.0.
+- Add `ATOMIC_GENERIC` and `ATOMIC_GENERIC_WITH_STOP` for new generic atomic implementations in RAJA v2026.07.0.
 - Added `sortKeyValueArrays` for simultaneously sorting two arrays.
 - Added additional instantiations when configured with explicit template instantiations.
 
