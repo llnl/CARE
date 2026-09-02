@@ -211,6 +211,11 @@ namespace care {
          return *reinterpret_cast<host_device_ptr<const T> const *> (this);
       }
 
+      ///
+      /// Copy assignment operator
+      ///
+      host_device_ptr& operator=(const host_device_ptr& other) = default;
+
 #if defined(CARE_ENABLE_BOUNDS_CHECKING)
       template <class Index>
       inline void boundsCheck(const Index i) const {
@@ -230,11 +235,6 @@ namespace care {
          }
       }
 #endif
-
-      ///
-      /// Copy assignment operator
-      ///
-      host_device_ptr& operator=(const host_device_ptr& other) = default;
 
       ///
       /// @author Peter Robinson
@@ -511,6 +511,18 @@ namespace care {
 
       CARE_HOST void move(ExecutionSpace space) {
          MA::move(chai::ExecutionSpace((int) space));
+      }
+
+      ///
+      /// Create a shallow slice of this array.
+      ///
+      /// @param begin The starting element of the slice.
+      /// @param elems The number of elements in the slice.
+      /// @return A host_device_ptr referring to the sliced range.
+      ///
+      CARE_HOST_DEVICE host_device_ptr<T> slice(size_t begin,
+                                                size_t elems = (size_t)-1) const {
+         return host_device_ptr<T>(MA::slice(begin, elems));
       }
    }; // class host_device_ptr
 
