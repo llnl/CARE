@@ -60,7 +60,15 @@ set(care_headers
     Setup.h
     single_access_ptr.h
     util.h
- )
+    sort.h
+    )
+
+set(care_host_headers
+    host/sort.h
+    )
+
+set(care_cuda_headers)
+set(care_hip_headers)
 
 set(care_sources
     care.cpp
@@ -97,6 +105,8 @@ if(ENABLE_OPENMP)
 endif()
 
 if(ENABLE_CUDA)
+   list(APPEND care_cuda_headers cuda/sort.h)
+
    # separable compilation, delay all device linking to executable linking time
    # set (CUDA_SEPARABLE_COMPILATION ON BOOL "" )
 
@@ -109,12 +119,17 @@ endif()
 
 
 if(ENABLE_HIP)
+  list(APPEND care_hip_headers hip/sort.h)
+
   list(APPEND care_depends blt::hip)
 endif ()
 
 blt_add_library(NAME care
                 SOURCES    ${care_sources}
                 HEADERS    ${care_headers}
+                           ${care_host_headers}
+                           ${care_cuda_headers}
+                           ${care_hip_headers}
                 INCLUDES   ${care_includes}
                 DEPENDS_ON ${care_depends})
 
@@ -124,6 +139,15 @@ blt_add_library(NAME care
 
 install(FILES       ${care_headers}
         DESTINATION include/care)
+
+install(FILES ${care_host_headers}
+        DESTINATION include/care/host)
+
+install(FILES ${care_cuda_headers}
+        DESTINATION include/care/cuda)
+
+install(FILES ${care_hip_headers}
+        DESTINATION include/care/hip)
 
 install(TARGETS care
         EXPORT  care-targets
@@ -153,4 +177,3 @@ install(
       ${PROJECT_SOURCE_DIR}/cmake/modules/FindCUB.cmake
    DESTINATION
       lib/cmake/care)
-
