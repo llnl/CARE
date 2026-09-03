@@ -84,6 +84,19 @@ target_include_directories(TestAlgorithm
 blt_add_test( NAME TestAlgorithm
               COMMAND TestAlgorithm )
 
+blt_add_executable( NAME TestSegmentedSort
+                    SOURCES TestSegmentedSort.cpp
+                    DEPENDS_ON ${care_test_dependencies} )
+
+target_include_directories(TestSegmentedSort
+                           PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(TestSegmentedSort
+                           PRIVATE ${PROJECT_BINARY_DIR}/include)
+
+blt_add_test( NAME TestSegmentedSort
+              COMMAND TestSegmentedSort )
+
 blt_add_executable( NAME TestKeyValueSorter
                     SOURCES TestKeyValueSorter.cpp
                     DEPENDS_ON ${care_test_dependencies} )
