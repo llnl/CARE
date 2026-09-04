@@ -25,6 +25,9 @@ namespace care::hip {
  * @param offsets Segment boundaries. For N segments, offsets must contain
  * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
  * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
+ * The entries must form a nondecreasing sequence from 0 to keys.size(); that
+ * is, offsets[0] must be 0 and offsets[N] must equal keys.size(). Repeated
+ * entries denote empty segments.
  */
 template <typename KeyT, typename OffsetT>
 CARE_INLINE void segmented_sort(care::host_device_ptr<KeyT>& keys,
