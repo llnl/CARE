@@ -15,9 +15,19 @@ TEST(segmented_exclusive_scan, segment_local_empty_and_nonzero_initial_value)
    care::host_device_ptr<int> values(8);
    care::host_device_ptr<int> offsets(5);
 
-   const int input[] = {5, 1, 4, 9, 3, 8, 7, 2};
+   const int input[] = {
+      5, 1, 4,
+      // empty segment
+      9, 3, 8,
+      7, 2
+   };
    const int segmentOffsets[] = {0, 3, 3, 6, 8};
-   const int expected[] = {10, 15, 16, 10, 19, 22, 10, 17};
+   const int expected[] = {
+      10, 15, 16,
+      // empty segment
+      10, 19, 22,
+      10, 17
+   };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 8) {
       values[i] = input[i];

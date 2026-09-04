@@ -15,9 +15,19 @@ TEST(segmented_sort, segment_local_and_empty)
    care::host_device_ptr<int> keys(8);
    care::host_device_ptr<int> offsets(5);
 
-   const int input[] = {5, 1, 4, 9, 3, 8, 7, 2};
+   const int input[] = {
+      5, 1, 4,
+      // empty segment
+      9, 3, 8,
+      7, 2
+   };
    const int segmentOffsets[] = {0, 3, 3, 6, 8};
-   const int expected[] = {1, 4, 5, 3, 8, 9, 2, 7};
+   const int expected[] = {
+      1, 4, 5,
+      // empty segment
+      3, 8, 9,
+      2, 7
+   };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 8) {
       keys[i] = input[i];
