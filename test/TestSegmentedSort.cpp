@@ -10,6 +10,8 @@
 
 #include "gtest/gtest.h"
 
+// Verify that each segment is sorted independently and empty segments are
+// accepted without affecting adjacent segments.
 TEST(segmented_sort, segment_local_and_empty)
 {
    care::host_device_ptr<int> keys(8);
@@ -47,6 +49,7 @@ TEST(segmented_sort, segment_local_and_empty)
    keys.free();
 }
 
+// Verify that sorting an empty key array is a no-op.
 TEST(segmented_sort, empty_input)
 {
    care::host_device_ptr<int> keys;
@@ -63,6 +66,8 @@ TEST(segmented_sort, empty_input)
    EXPECT_EQ(keys.data(), nullptr);
 }
 
+// Verify that sorting a slice updates its backing storage without replacing
+// the slice or modifying values outside it.
 TEST(segmented_sort, preserves_slice)
 {
    care::host_device_ptr<int> storage(6);
