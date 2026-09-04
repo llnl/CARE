@@ -20,7 +20,8 @@ namespace care::host {
  * @param keys Keys to sort in place.
  * @param offsets Segment boundaries. For N segments, offsets must contain
  * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
- * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
+ * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]). The
+ * entries must be monotonically nondecreasing and within [0, keys.size()].
  */
 template <typename KeyT, typename OffsetT>
 void segmented_sort(care::host_device_ptr<KeyT>& keys,
