@@ -23,7 +23,9 @@ namespace care {
 /**
  * @brief Perform an in-place exclusive scan independently within each segment.
  * @param values Values to scan and replace with the exclusive scan results.
- * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ * @param offsets Segment boundaries. For N segments, offsets must contain
+ * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
+ * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
  * @param initialValue Initial value assigned to the first item of each segment.
  * @param binaryOp Associative binary operation used to perform the scan.
  */
@@ -46,7 +48,9 @@ CARE_INLINE void segmented_exclusive_scan(
 /**
  * @brief Perform an in-place exclusive sum independently within each segment.
  * @param values Values to scan and replace with the exclusive sums.
- * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ * @param offsets Segment boundaries. For N segments, offsets must contain
+ * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
+ * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
  * @param initialValue Initial value assigned to the first item of each segment.
  */
 template <typename ValueT, typename OffsetT>
@@ -68,7 +72,9 @@ CARE_INLINE void segmented_exclusive_scan(
  * @brief Perform an in-place exclusive sum with an initial value of zero
  * independently within each segment.
  * @param values Values to scan and replace with the exclusive sums.
- * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ * @param offsets Segment boundaries. For N segments, offsets must contain
+ * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
+ * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
  */
 template <typename ValueT, typename OffsetT>
 CARE_INLINE void segmented_exclusive_scan(
