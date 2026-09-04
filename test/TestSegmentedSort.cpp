@@ -47,6 +47,43 @@ TEST(segmented_sort, segment_local_and_empty)
    keys.free();
 }
 
+TEST(segmented_sort, preserves_gaps_before_and_after_segments)
+{
+   care::host_device_ptr<int> keys(9);
+   care::host_device_ptr<int> offsets(3);
+
+   const int input[] = {
+      -2, -1, // gap before first segment
+      5, 1, 4,
+      9, 3,
+      -4, -3 // gap after final segment
+   };
+   const int segmentOffsets[] = {2, 5, 7};
+   const int expected[] = {
+      -2, -1, // gap before first segment
+      1, 4, 5,
+      3, 9,
+      -4, -3 // gap after final segment
+   };
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 9) {
+      keys[i] = input[i];
+   } CARE_SEQUENTIAL_LOOP_END
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 3) {
+      offsets[i] = segmentOffsets[i];
+   } CARE_SEQUENTIAL_LOOP_END
+
+   care::segmented_sort(keys, offsets);
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 9) {
+      EXPECT_EQ(keys[i], expected[i]);
+   } CARE_SEQUENTIAL_LOOP_END
+
+   offsets.free();
+   keys.free();
+}
+
 TEST(segmented_sort, preserves_slice)
 {
    care::host_device_ptr<int> storage(6);
