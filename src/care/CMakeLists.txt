@@ -57,6 +57,7 @@ set(care_headers
     ProfilePlugin.h
     scan.h
     scan_impl.h
+    segmented_scan.h
     Setup.h
     single_access_ptr.h
     util.h
@@ -64,6 +65,7 @@ set(care_headers
     )
 
 set(care_host_headers
+    host/segmented_scan.h
     host/sort.h
     )
 
@@ -105,6 +107,7 @@ if(ENABLE_OPENMP)
 endif()
 
 if(ENABLE_CUDA)
+   list(APPEND care_cuda_headers cuda/segmented_scan.h)
    list(APPEND care_cuda_headers cuda/sort.h)
 
    # separable compilation, delay all device linking to executable linking time
@@ -119,6 +122,7 @@ endif()
 
 
 if(ENABLE_HIP)
+  list(APPEND care_hip_headers hip/segmented_scan.h)
   list(APPEND care_hip_headers hip/sort.h)
 
   list(APPEND care_depends blt::hip)

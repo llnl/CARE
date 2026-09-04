@@ -10,6 +10,8 @@
 
 #include "gtest/gtest.h"
 
+// Verify that each segment is sorted independently and empty segments are
+// accepted without affecting adjacent segments.
 TEST(segmented_sort, segment_local_and_empty)
 {
    care::host_device_ptr<int> keys(8);
@@ -47,6 +49,25 @@ TEST(segmented_sort, segment_local_and_empty)
    keys.free();
 }
 
+// Verify that sorting an empty key array is a no-op.
+TEST(segmented_sort, empty_input)
+{
+   care::host_device_ptr<int> keys;
+   care::host_device_ptr<int> offsets(1);
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 1) {
+      offsets[i] = 0;
+   } CARE_SEQUENTIAL_LOOP_END
+
+   care::segmented_sort(keys, offsets);
+   offsets.free();
+
+   EXPECT_EQ(keys.size(), 0);
+   EXPECT_EQ(keys.data(), nullptr);
+}
+
+// Verify that sorting a slice updates its backing storage without replacing
+// the slice or modifying values outside it.
 TEST(segmented_sort, preserves_slice)
 {
    care::host_device_ptr<int> storage(6);
@@ -83,22 +104,6 @@ TEST(segmented_sort, preserves_slice)
 
    offsets.free();
    storage.free();
-}
-
-TEST(segmented_sort, empty_input)
-{
-   care::host_device_ptr<int> keys;
-   care::host_device_ptr<int> offsets(1);
-
-   CARE_SEQUENTIAL_LOOP(i, 0, 1) {
-      offsets[i] = 0;
-   } CARE_SEQUENTIAL_LOOP_END
-
-   care::segmented_sort(keys, offsets);
-   offsets.free();
-
-   EXPECT_EQ(keys.size(), 0);
-   EXPECT_EQ(keys.data(), nullptr);
 }
 
 int main(int argc, char** argv)
