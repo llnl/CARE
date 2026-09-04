@@ -53,9 +53,19 @@ TEST(segmented_sort, preserves_slice)
    care::host_device_ptr<int> keys = storage.slice(1, 4);
    care::host_device_ptr<int> offsets(3);
 
-   const int input[] = {-1, 4, 2, 5, 3, -2};
+   const int input[] = {
+      -1, // before slice
+      4, 2,
+      5, 3,
+      -2 // after slice
+   };
    const int segmentOffsets[] = {0, 2, 4};
-   const int expected[] = {-1, 2, 4, 3, 5, -2};
+   const int expected[] = {
+      -1, // before slice
+      2, 4,
+      3, 5,
+      -2 // after slice
+   };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 6) {
       storage[i] = input[i];
