@@ -43,6 +43,12 @@ CARE_INLINE void segmented_exclusive_scan(
 #endif
 }
 
+/**
+ * @brief Perform an in-place exclusive sum independently within each segment.
+ * @param values Values to scan and replace with the exclusive sums.
+ * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ * @param initialValue Initial value assigned to the first item of each segment.
+ */
 template <typename ValueT, typename OffsetT>
 CARE_INLINE void segmented_exclusive_scan(
    care::host_device_ptr<ValueT>& values,

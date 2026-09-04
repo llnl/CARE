@@ -41,6 +41,12 @@ void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
    }
 }
 
+/**
+ * @brief Perform an in-place exclusive sum independently within each segment.
+ * @param values Values to scan and replace with the exclusive sums.
+ * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ * @param initialValue Initial value assigned to the first item of each segment.
+ */
 template <typename ValueT, typename OffsetT>
 void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
                               care::host_device_ptr<OffsetT> const& offsets,
@@ -50,6 +56,12 @@ void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
                             std::plus<ValueT> {});
 }
 
+/**
+ * @brief Perform an in-place exclusive sum with an initial value of zero
+ * independently within each segment.
+ * @param values Values to scan and replace with the exclusive sums.
+ * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ */
 template <typename ValueT, typename OffsetT>
 void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
                               care::host_device_ptr<OffsetT> const& offsets)
