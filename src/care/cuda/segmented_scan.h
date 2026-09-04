@@ -109,6 +109,14 @@ CARE_INLINE void segmented_exclusive_scan(
    segmented_exclusive_scan(values, offsets, initialValue, cub::Sum {});
 }
 
+template <typename ValueT, typename OffsetT>
+CARE_INLINE void segmented_exclusive_scan(
+   care::host_device_ptr<ValueT>& values,
+   care::host_device_ptr<OffsetT> const& offsets)
+{
+   segmented_exclusive_scan(values, offsets, ValueT {});
+}
+
 } // namespace care::cuda
 
 #endif // CARE_CUDA_SEGMENTED_SCAN_H

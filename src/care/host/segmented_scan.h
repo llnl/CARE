@@ -50,6 +50,13 @@ void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
                             std::plus<ValueT> {});
 }
 
+template <typename ValueT, typename OffsetT>
+void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
+                              care::host_device_ptr<OffsetT> const& offsets)
+{
+   segmented_exclusive_scan(values, offsets, ValueT {});
+}
+
 } // namespace care::host
 
 #endif // CARE_HOST_SEGMENTED_SCAN_H

@@ -58,6 +58,26 @@ CARE_INLINE void segmented_exclusive_scan(
 #endif
 }
 
+/**
+ * @brief Perform an in-place exclusive sum with an initial value of zero
+ * independently within each segment.
+ * @param values Values to scan and replace with the exclusive sums.
+ * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ */
+template <typename ValueT, typename OffsetT>
+CARE_INLINE void segmented_exclusive_scan(
+   care::host_device_ptr<ValueT>& values,
+   care::host_device_ptr<OffsetT> const& offsets)
+{
+#if defined(__CUDACC__)
+   care::cuda::segmented_exclusive_scan(values, offsets);
+#elif defined(__HIPCC__)
+   care::hip::segmented_exclusive_scan(values, offsets);
+#else
+   care::host::segmented_exclusive_scan(values, offsets);
+#endif
+}
+
 } // namespace care
 
 #endif // CARE_SEGMENTED_SCAN_H

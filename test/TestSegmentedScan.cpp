@@ -115,6 +115,39 @@ TEST(segmented_exclusive_scan, generic_binary_operation)
    values.free();
 }
 
+TEST(segmented_exclusive_scan, defaults_to_zero_and_addition)
+{
+   care::host_device_ptr<int> values(5);
+   care::host_device_ptr<int> offsets(3);
+
+   const int input[] = {
+      3, 4, 5,
+      6, 7
+   };
+   const int segmentOffsets[] = {0, 3, 5};
+   const int expected[] = {
+      0, 3, 7,
+      0, 6
+   };
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 5) {
+      values[i] = input[i];
+   } CARE_SEQUENTIAL_LOOP_END
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 3) {
+      offsets[i] = segmentOffsets[i];
+   } CARE_SEQUENTIAL_LOOP_END
+
+   care::segmented_exclusive_scan(values, offsets);
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 5) {
+      EXPECT_EQ(values[i], expected[i]);
+   } CARE_SEQUENTIAL_LOOP_END
+
+   offsets.free();
+   values.free();
+}
+
 TEST(segmented_exclusive_scan, empty_input)
 {
    care::host_device_ptr<int> values;

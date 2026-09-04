@@ -91,6 +91,14 @@ CARE_INLINE void segmented_exclusive_scan(
                             rocprim::plus<ValueT> {});
 }
 
+template <typename ValueT, typename OffsetT>
+CARE_INLINE void segmented_exclusive_scan(
+   care::host_device_ptr<ValueT>& values,
+   care::host_device_ptr<OffsetT> const& offsets)
+{
+   segmented_exclusive_scan(values, offsets, ValueT {});
+}
+
 } // namespace care::hip
 
 #endif // CARE_HIP_SEGMENTED_SCAN_H
