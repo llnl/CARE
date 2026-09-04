@@ -152,21 +152,17 @@ TEST(segmented_exclusive_scan, preserves_slice)
    care::host_device_ptr<int> offsets(3);
 
    const int input[] = {
-      // before slice
-      -1,
+      -1, // before slice
       2, 3,
       4, 5,
-      // after slice
-      -2
+      -2 // after slice
    };
    const int segmentOffsets[] = {0, 2, 4};
    const int expected[] = {
-      // before slice
-      -1,
+      -1, // before slice
       1, 3,
       1, 5,
-      // after slice
-      -2
+      -2 // after slice
    };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 6) {

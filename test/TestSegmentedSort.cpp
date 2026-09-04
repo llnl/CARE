@@ -75,21 +75,17 @@ TEST(segmented_sort, preserves_slice)
    care::host_device_ptr<int> offsets(3);
 
    const int input[] = {
-      // before slice
-      -1,
+      -1, // before slice
       4, 2,
       5, 3,
-      // after slice
-      -2
+      -2 // after slice
    };
    const int segmentOffsets[] = {0, 2, 4};
    const int expected[] = {
-      // before slice
-      -1,
+      -1, // before slice
       2, 4,
       3, 5,
-      // after slice
-      -2
+      -2 // after slice
    };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 6) {
