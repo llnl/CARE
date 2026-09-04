@@ -25,6 +25,9 @@ namespace care::hip {
  * @param offsets Segment boundaries. For N segments, offsets must contain
  * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
  * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
+ * The entries must form a nondecreasing sequence from 0 to values.size(); that
+ * is, offsets[0] must be 0 and offsets[N] must equal values.size(). Repeated
+ * entries denote empty segments.
  * @param initialValue Initial value assigned to the first item of each segment.
  * @param binaryOp Associative binary operation used to perform the scan.
  */
@@ -89,6 +92,9 @@ CARE_INLINE void segmented_exclusive_scan(
  * @param offsets Segment boundaries. For N segments, offsets must contain
  * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
  * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
+ * The entries must form a nondecreasing sequence from 0 to values.size(); that
+ * is, offsets[0] must be 0 and offsets[N] must equal values.size(). Repeated
+ * entries denote empty segments.
  * @param initialValue Initial value assigned to the first item of each segment.
  */
 template <typename ValueT, typename OffsetT>
@@ -108,6 +114,9 @@ CARE_INLINE void segmented_exclusive_scan(
  * @param offsets Segment boundaries. For N segments, offsets must contain
  * N + 1 entries: offsets[i] begins segment i, and offsets[N] marks the end of
  * the final segment. Segment i is therefore [offsets[i], offsets[i + 1]).
+ * The entries must form a nondecreasing sequence from 0 to values.size(); that
+ * is, offsets[0] must be 0 and offsets[N] must equal values.size(). Repeated
+ * entries denote empty segments.
  */
 template <typename ValueT, typename OffsetT>
 CARE_INLINE void segmented_exclusive_scan(
