@@ -10,7 +10,9 @@
 
 #include "care/host_device_ptr.h"
 
-#if defined(__HIPCC__)
+#if defined(__CUDACC__)
+#include "care/cuda/segmented_scan.h"
+#elif defined(__HIPCC__)
 #include "care/hip/segmented_scan.h"
 #else
 #include "care/host/segmented_scan.h"
@@ -30,7 +32,9 @@ CARE_INLINE void segmented_exclusive_scan(
    care::host_device_ptr<OffsetT> const& offsets,
    ValueT initialValue)
 {
-#if defined(__HIPCC__)
+#if defined(__CUDACC__)
+   care::cuda::segmented_exclusive_scan(values, offsets, initialValue);
+#elif defined(__HIPCC__)
    care::hip::segmented_exclusive_scan(values, offsets, initialValue);
 #else
    care::host::segmented_exclusive_scan(values, offsets, initialValue);

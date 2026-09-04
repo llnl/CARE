@@ -12,10 +12,6 @@
 
 TEST(segmented_exclusive_scan, segment_local_empty_and_nonzero_initial_value)
 {
-#ifdef CARE_GPUCC
-   init_care_for_testing();
-#endif
-
    care::host_device_ptr<int> values(8);
    care::host_device_ptr<int> offsets(5);
 
@@ -43,10 +39,6 @@ TEST(segmented_exclusive_scan, segment_local_empty_and_nonzero_initial_value)
 
 TEST(segmented_exclusive_scan, preserves_slice)
 {
-#ifdef CARE_GPUCC
-   init_care_for_testing();
-#endif
-
    care::host_device_ptr<int> storage(6);
    care::host_device_ptr<int> values = storage.slice(1, 4);
    care::host_device_ptr<int> offsets(3);
@@ -75,10 +67,6 @@ TEST(segmented_exclusive_scan, preserves_slice)
 
 TEST(segmented_exclusive_scan, empty_input)
 {
-#ifdef CARE_GPUCC
-   init_care_for_testing();
-#endif
-
    care::host_device_ptr<int> values;
    care::host_device_ptr<int> offsets(1);
 
@@ -91,4 +79,15 @@ TEST(segmented_exclusive_scan, empty_input)
 
    EXPECT_EQ(values.size(), 0);
    EXPECT_EQ(values.data(), nullptr);
+}
+
+int main(int argc, char** argv)
+{
+   testing::InitGoogleTest(&argc, argv);
+
+#ifdef CARE_GPUCC
+   init_care_for_testing();
+#endif
+
+   return RUN_ALL_TESTS();
 }

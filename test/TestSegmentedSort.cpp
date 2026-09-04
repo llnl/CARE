@@ -12,10 +12,6 @@
 
 TEST(segmented_sort, segment_local_and_empty)
 {
-#ifdef CARE_GPUCC
-   init_care_for_testing();
-#endif
-
    care::host_device_ptr<int> keys(8);
    care::host_device_ptr<int> offsets(5);
 
@@ -43,10 +39,6 @@ TEST(segmented_sort, segment_local_and_empty)
 
 TEST(segmented_sort, empty_input)
 {
-#ifdef CARE_GPUCC
-   init_care_for_testing();
-#endif
-
    care::host_device_ptr<int> keys;
    care::host_device_ptr<int> offsets(1);
 
@@ -59,4 +51,15 @@ TEST(segmented_sort, empty_input)
 
    EXPECT_EQ(keys.size(), 0);
    EXPECT_EQ(keys.data(), nullptr);
+}
+
+int main(int argc, char** argv)
+{
+   testing::InitGoogleTest(&argc, argv);
+
+#ifdef CARE_GPUCC
+   init_care_for_testing();
+#endif
+
+   return RUN_ALL_TESTS();
 }

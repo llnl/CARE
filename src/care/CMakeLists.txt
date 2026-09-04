@@ -107,6 +107,7 @@ if(ENABLE_OPENMP)
 endif()
 
 if(ENABLE_CUDA)
+   list(APPEND care_cuda_headers cuda/segmented_scan.h)
    list(APPEND care_cuda_headers cuda/sort.h)
 
    # separable compilation, delay all device linking to executable linking time
