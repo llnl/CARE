@@ -1,0 +1,84 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright (c) Lawrence Livermore National Security, LLC and other CARE
+// contributors. See the CARE LICENSE and COPYRIGHT files for details.
+//
+// SPDX-License-Identifier: BSD-3-Clause
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef CARE_HIP_SEGMENTED_SCAN_H
+#define CARE_HIP_SEGMENTED_SCAN_H
+
+#include "care/CHAIDataGetter.h"
+#include "care/DefaultMacros.h"
+#include "care/host_device_ptr.h"
+
+#include <cstddef>
+#include <utility>
+
+#include "rocprim/rocprim.hpp"
+
+namespace care::hip {
+
+/**
+ * @brief Perform an in-place exclusive sum independently within each segment.
+ * @param values Values to scan and replace with the exclusive sums.
+ * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
+ * @param initialValue Initial value assigned to the first item of each segment.
+ */
+template <typename ValueT, typename OffsetT>
+CARE_INLINE void segmented_exclusive_scan(
+   care::host_device_ptr<ValueT>& values,
+   care::host_device_ptr<OffsetT> const& offsets,
+   ValueT initialValue)
+{
+   const size_t numSegments = offsets.size() > 0 ? offsets.size() - 1 : 0;
+   const size_t numItems = values.size();
+
+   if (numSegments == 0 || numItems == 0) {
+      return;
+   }
+
+   CHAIDataGetter<ValueT, RAJADeviceExec> valueGetter {};
+   auto* rawValues = valueGetter.getRawArrayData(values);
+
+   CHAIDataGetter<OffsetT, RAJADeviceExec> offsetGetter {};
+   const auto* rawOffsets = offsetGetter.getConstRawArrayData(offsets);
+
+   care::host_device_ptr<ValueT> result(numItems);
+   auto* rawResult = valueGetter.getRawArrayData(result);
+
+   size_t tempStorageBytes = 0;
+   rocprim::segmented_exclusive_scan(nullptr, tempStorageBytes,
+                                     rawValues, rawResult,
+                                     static_cast<unsigned int>(numSegments),
+                                     rawOffsets, rawOffsets + 1,
+                                     initialValue);
+
+   CHAIDataGetter<char, RAJADeviceExec> charGetter {};
+   care::host_device_ptr<char> tempStorage(tempStorageBytes);
+   auto* rawTempStorage = charGetter.getRawArrayData(tempStorage);
+   rocprim::segmented_exclusive_scan(rawTempStorage, tempStorageBytes,
+                                     rawValues, rawResult,
+                                     static_cast<unsigned int>(numSegments),
+                                     rawOffsets, rawOffsets + 1,
+                                     initialValue);
+
+   tempStorage.free();
+
+   if (values.isSlice()) {
+      care::host_device_ptr<const ValueT> source = result;
+
+      CARE_STREAM_LOOP(i, 0, numItems) {
+         values[i] = source[i];
+      } CARE_STREAM_LOOP_END
+
+      result.free();
+   } else {
+      values.free();
+      values = std::move(result);
+   }
+}
+
+} // namespace care::hip
+
+#endif // CARE_HIP_SEGMENTED_SCAN_H
