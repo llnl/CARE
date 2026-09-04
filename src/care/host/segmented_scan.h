@@ -11,20 +11,23 @@
 #include "care/host_device_ptr.h"
 
 #include <cstddef>
+#include <functional>
 #include <numeric>
 
 namespace care::host {
 
 /**
- * @brief Perform an in-place exclusive sum independently within each segment.
- * @param values Values to scan and replace with the exclusive sums.
+ * @brief Perform an in-place exclusive scan independently within each segment.
+ * @param values Values to scan and replace with the exclusive scan results.
  * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
  * @param initialValue Initial value assigned to the first item of each segment.
+ * @param binaryOp Associative binary operation used to perform the scan.
  */
-template <typename ValueT, typename OffsetT>
+template <typename ValueT, typename OffsetT, typename BinaryOp>
 void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
                               care::host_device_ptr<OffsetT> const& offsets,
-                              ValueT initialValue)
+                              ValueT initialValue,
+                              BinaryOp binaryOp)
 {
    const size_t numSegments = offsets.size() > 0 ? offsets.size() - 1 : 0;
    ValueT* rawValues = values.data();
@@ -34,8 +37,17 @@ void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
       const size_t begin = static_cast<size_t>(rawOffsets[segment]);
       const size_t end = static_cast<size_t>(rawOffsets[segment + 1]);
       std::exclusive_scan(rawValues + begin, rawValues + end,
-                          rawValues + begin, initialValue);
+                          rawValues + begin, initialValue, binaryOp);
    }
+}
+
+template <typename ValueT, typename OffsetT>
+void segmented_exclusive_scan(care::host_device_ptr<ValueT>& values,
+                              care::host_device_ptr<OffsetT> const& offsets,
+                              ValueT initialValue)
+{
+   segmented_exclusive_scan(values, offsets, initialValue,
+                            std::plus<ValueT> {});
 }
 
 } // namespace care::host

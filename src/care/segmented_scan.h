@@ -21,11 +21,28 @@
 namespace care {
 
 /**
- * @brief Perform an in-place exclusive sum independently within each segment.
- * @param values Values to scan and replace with the exclusive sums.
+ * @brief Perform an in-place exclusive scan independently within each segment.
+ * @param values Values to scan and replace with the exclusive scan results.
  * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
  * @param initialValue Initial value assigned to the first item of each segment.
+ * @param binaryOp Associative binary operation used to perform the scan.
  */
+template <typename ValueT, typename OffsetT, typename BinaryOp>
+CARE_INLINE void segmented_exclusive_scan(
+   care::host_device_ptr<ValueT>& values,
+   care::host_device_ptr<OffsetT> const& offsets,
+   ValueT initialValue,
+   BinaryOp binaryOp)
+{
+#if defined(__CUDACC__)
+   care::cuda::segmented_exclusive_scan(values, offsets, initialValue, binaryOp);
+#elif defined(__HIPCC__)
+   care::hip::segmented_exclusive_scan(values, offsets, initialValue, binaryOp);
+#else
+   care::host::segmented_exclusive_scan(values, offsets, initialValue, binaryOp);
+#endif
+}
+
 template <typename ValueT, typename OffsetT>
 CARE_INLINE void segmented_exclusive_scan(
    care::host_device_ptr<ValueT>& values,

@@ -20,16 +20,18 @@
 namespace care::cuda {
 
 /**
- * @brief Perform an in-place exclusive sum independently within each segment.
- * @param values Values to scan and replace with the exclusive sums.
+ * @brief Perform an in-place exclusive scan independently within each segment.
+ * @param values Values to scan and replace with the exclusive scan results.
  * @param offsets Segment boundaries; segment i is [offsets[i], offsets[i + 1]).
  * @param initialValue Initial value assigned to the first item of each segment.
+ * @param binaryOp Associative binary operation used to perform the scan.
  */
-template <typename ValueT, typename OffsetT>
+template <typename ValueT, typename OffsetT, typename BinaryOp>
 CARE_INLINE void segmented_exclusive_scan(
    care::host_device_ptr<ValueT>& values,
    care::host_device_ptr<OffsetT> const& offsets,
-   ValueT initialValue)
+   ValueT initialValue,
+   BinaryOp binaryOp)
 {
    const size_t numSegments = offsets.size() > 0 ? offsets.size() - 1 : 0;
    const size_t numItems = values.size();
@@ -72,14 +74,14 @@ CARE_INLINE void segmented_exclusive_scan(
    size_t tempStorageBytes = 0;
    cub::DeviceScan::ExclusiveScanByKey(nullptr, tempStorageBytes,
                                        rawSegmentIds, rawValues, rawResult,
-                                       cub::Sum {}, initialValue, numItems);
+                                       binaryOp, initialValue, numItems);
 
    CHAIDataGetter<char, RAJADeviceExec> charGetter {};
    care::host_device_ptr<char> tempStorage(tempStorageBytes);
    auto* rawTempStorage = charGetter.getRawArrayData(tempStorage);
    cub::DeviceScan::ExclusiveScanByKey(rawTempStorage, tempStorageBytes,
                                        rawSegmentIds, rawValues, rawResult,
-                                       cub::Sum {}, initialValue, numItems);
+                                       binaryOp, initialValue, numItems);
 
    tempStorage.free();
    segmentIds.free();
@@ -96,6 +98,15 @@ CARE_INLINE void segmented_exclusive_scan(
       values.free();
       values = std::move(result);
    }
+}
+
+template <typename ValueT, typename OffsetT>
+CARE_INLINE void segmented_exclusive_scan(
+   care::host_device_ptr<ValueT>& values,
+   care::host_device_ptr<OffsetT> const& offsets,
+   ValueT initialValue)
+{
+   segmented_exclusive_scan(values, offsets, initialValue, cub::Sum {});
 }
 
 } // namespace care::cuda

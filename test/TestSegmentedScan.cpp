@@ -10,6 +10,13 @@
 
 #include "gtest/gtest.h"
 
+struct Multiply {
+   CARE_HOST_DEVICE int operator()(int lhs, int rhs) const
+   {
+      return lhs * rhs;
+   }
+};
+
 TEST(segmented_exclusive_scan, segment_local_empty_and_nonzero_initial_value)
 {
    care::host_device_ptr<int> values(8);
@@ -73,6 +80,39 @@ TEST(segmented_exclusive_scan, preserves_slice)
 
    offsets.free();
    storage.free();
+}
+
+TEST(segmented_exclusive_scan, generic_binary_operation)
+{
+   care::host_device_ptr<int> values(5);
+   care::host_device_ptr<int> offsets(3);
+
+   const int input[] = {
+      3, 4, 5,
+      6, 7
+   };
+   const int segmentOffsets[] = {0, 3, 5};
+   const int expected[] = {
+      2, 6, 24,
+      2, 12
+   };
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 5) {
+      values[i] = input[i];
+   } CARE_SEQUENTIAL_LOOP_END
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 3) {
+      offsets[i] = segmentOffsets[i];
+   } CARE_SEQUENTIAL_LOOP_END
+
+   care::segmented_exclusive_scan(values, offsets, 2, Multiply {});
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 5) {
+      EXPECT_EQ(values[i], expected[i]);
+   } CARE_SEQUENTIAL_LOOP_END
+
+   offsets.free();
+   values.free();
 }
 
 TEST(segmented_exclusive_scan, empty_input)
