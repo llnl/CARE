@@ -47,6 +47,22 @@ TEST(segmented_sort, segment_local_and_empty)
    keys.free();
 }
 
+TEST(segmented_sort, empty_input)
+{
+   care::host_device_ptr<int> keys;
+   care::host_device_ptr<int> offsets(1);
+
+   CARE_SEQUENTIAL_LOOP(i, 0, 1) {
+      offsets[i] = 0;
+   } CARE_SEQUENTIAL_LOOP_END
+
+   care::segmented_sort(keys, offsets);
+   offsets.free();
+
+   EXPECT_EQ(keys.size(), 0);
+   EXPECT_EQ(keys.data(), nullptr);
+}
+
 TEST(segmented_sort, preserves_slice)
 {
    care::host_device_ptr<int> storage(6);
@@ -54,17 +70,21 @@ TEST(segmented_sort, preserves_slice)
    care::host_device_ptr<int> offsets(3);
 
    const int input[] = {
-      -1, // before slice
+      // before slice
+      -1,
       4, 2,
       5, 3,
-      -2 // after slice
+      // after slice
+      -2
    };
    const int segmentOffsets[] = {0, 2, 4};
    const int expected[] = {
-      -1, // before slice
+      // before slice
+      -1,
       2, 4,
       3, 5,
-      -2 // after slice
+      // after slice
+      -2
    };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 6) {
@@ -83,22 +103,6 @@ TEST(segmented_sort, preserves_slice)
 
    offsets.free();
    storage.free();
-}
-
-TEST(segmented_sort, empty_input)
-{
-   care::host_device_ptr<int> keys;
-   care::host_device_ptr<int> offsets(1);
-
-   CARE_SEQUENTIAL_LOOP(i, 0, 1) {
-      offsets[i] = 0;
-   } CARE_SEQUENTIAL_LOOP_END
-
-   care::segmented_sort(keys, offsets);
-   offsets.free();
-
-   EXPECT_EQ(keys.size(), 0);
-   EXPECT_EQ(keys.data(), nullptr);
 }
 
 int main(int argc, char** argv)
