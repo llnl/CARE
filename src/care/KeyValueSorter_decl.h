@@ -892,26 +892,6 @@ class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJADevic
          }
       }
 
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Benjamin Liu
-      /// @brief no-op
-      /// GPU version does not require separate allocation for keys array.
-      /// @return void
-      ///////////////////////////////////////////////////////////////////////////
-      void initializeKeys() const {
-         return;
-      }
-
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Benjamin Liu
-      /// @brief no-op
-      /// GPU version does not require separate allocation for values array.
-      /// @return void
-      ///////////////////////////////////////////////////////////////////////////
-      void initializeValues() const {
-         return;
-      }
-
    private:
       size_t m_len = 0;
       bool m_ownsPointers = false; /// Prevents memory from being freed by lambda captures
@@ -1448,26 +1428,6 @@ class CARE_KEY_VALUE_SORTER_DLL_API KeyValueSorter<KeyType, ValueType, RAJA::seq
             m_values.realloc(newSize);
             m_len = newSize;
          }
-      }
-
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Alan Dayton
-      /// @brief No-op retained for compatibility with host-device map setup.
-      /// Keys are stored directly in the host-side key array.
-      /// @return void
-      ///////////////////////////////////////////////////////////////////////////
-      void initializeKeys() const {
-         return;
-      }
-
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Alan Dayton
-      /// @brief No-op retained for compatibility with host-device map setup.
-      /// Values are stored directly in the host-side value array.
-      /// @return void
-      ///////////////////////////////////////////////////////////////////////////
-      void initializeValues() const {
-         return;
       }
 
    private:
