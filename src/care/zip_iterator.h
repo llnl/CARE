@@ -36,10 +36,10 @@ class zip_iterator {
          value = other.value;
          return *this;
       }
-      reference& operator=(reference const& other)
-      { return *this = value_type(other); }
-      reference& operator=(reference&& other)
-      { return *this = value_type(other); }
+
+      reference& operator=(reference const& other) { return *this = value_type(other); }
+
+      reference& operator=(reference&& other) { return *this = value_type(other); }
 
       friend void swap(reference left, reference right) noexcept
       {
@@ -59,30 +59,47 @@ class zip_iterator {
    using iterator_category = std::random_access_iterator_tag;
 
    zip_iterator() = default;
+
    zip_iterator(KeyT* keys, ValueT* values, std::ptrdiff_t index = 0)
       : m_keys(keys), m_values(values), m_index(index) {}
 
    reference operator*() const { return {m_keys[m_index], m_values[m_index]}; }
+
    reference operator[](difference_type offset) const { return *(*this + offset); }
 
    zip_iterator& operator++() { ++m_index; return *this; }
+
    zip_iterator operator++(int) { auto result = *this; ++*this; return result; }
+
    zip_iterator& operator--() { --m_index; return *this; }
+
    zip_iterator operator--(int) { auto result = *this; --*this; return result; }
+
    zip_iterator& operator+=(difference_type offset) { m_index += offset; return *this; }
+
    zip_iterator& operator-=(difference_type offset) { m_index -= offset; return *this; }
 
    friend zip_iterator operator+(zip_iterator it, difference_type offset) { return it += offset; }
+
    friend zip_iterator operator+(difference_type offset, zip_iterator it) { return it += offset; }
+
    friend zip_iterator operator-(zip_iterator it, difference_type offset) { return it -= offset; }
+
    friend difference_type operator-(zip_iterator left, zip_iterator right)
-   { return left.m_index - right.m_index; }
+   {
+      return left.m_index - right.m_index;
+   }
 
    friend bool operator==(zip_iterator left, zip_iterator right) { return left.m_index == right.m_index; }
+
    friend bool operator!=(zip_iterator left, zip_iterator right) { return !(left == right); }
+
    friend bool operator<(zip_iterator left, zip_iterator right) { return left.m_index < right.m_index; }
+
    friend bool operator>(zip_iterator left, zip_iterator right) { return right < left; }
+
    friend bool operator<=(zip_iterator left, zip_iterator right) { return !(right < left); }
+
    friend bool operator>=(zip_iterator left, zip_iterator right) { return !(left < right); }
 };
 
