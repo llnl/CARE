@@ -26,51 +26,6 @@
 
 
 namespace care {
-   ///////////////////////////////////////////////////////////////////////////
-   /// @struct _kv
-   /// @author Peter Robinson
-   /// @brief The key value pair struct used by the sequential version of
-   ///    KeyValueSorter
-   ///////////////////////////////////////////////////////////////////////////
-   template <typename KeyType, typename ValueType>
-   struct _kv {
-      KeyType key;
-      ValueType value;
-
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Peter Robinson
-      /// @brief Less than comparison operator
-      /// Used as a comparator in the STL
-      /// @param right - right _kv to compare
-      /// @return true if this value is less than right's value, false otherwise
-      ///////////////////////////////////////////////////////////////////////////
-      inline bool operator <(_kv const && right) { return value < right.value; };
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Peter Robinson
-      /// @brief Equality operator
-      /// Used as a comparator
-      /// @param right - right _kv to compare
-      /// @return true if this value is less than right's value, false otherwise
-      ///////////////////////////////////////////////////////////////////////////
-      inline bool operator ==(_kv const & right) const { return value == right.value && key == right.key;  };
-   };
-
-   ///
-   /// @author Alan Dayton
-   ///
-   /// @brief Overload operator<< for the _kv struct
-   ///
-   /// @param[in] os   The output stream
-   /// @param[in] kv   The struct to process
-   ///
-   /// @return   The output stream for chaining of operations
-   ///
-   template <typename KeyType, typename ValueType>
-   inline std::ostream& operator<<(std::ostream& os, const _kv<KeyType, ValueType>& kv) {
-      os << kv.key << ": " << kv.value;
-      return os;
-   }
-
    ///
    /// @author Peter Robinson, Ben Liu, Alan Dayton, Arlie Capps
    ///
