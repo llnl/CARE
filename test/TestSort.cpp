@@ -29,7 +29,7 @@ TEST(sort, ascending)
    keys.free();
 }
 
-TEST(sort, preserves_slice)
+TEST(sort, preserves_slices)
 {
    care::host_device_ptr<int> storage(6);
    care::host_device_ptr<int> keys = storage.slice(1, 4);
@@ -49,7 +49,17 @@ TEST(sort, preserves_slice)
    storage.free();
 }
 
-TEST(paired_sort, preserves_key_value_association)
+TEST(sort, empty)
+{
+   care::host_device_ptr<int> keys;
+
+   care::sort(keys);
+
+   EXPECT_EQ(keys.size(), 0);
+   EXPECT_EQ(keys.data(), nullptr);
+}
+
+TEST(paired_sort, ascending)
 {
    care::host_device_ptr<int> keys(6);
    care::host_device_ptr<char> values(6);
@@ -101,9 +111,22 @@ TEST(paired_sort, preserves_slices)
    keyStorage.free();
 }
 
+TEST(paired_sort, empty)
+{
+   care::host_device_ptr<int> keys;
+   care::host_device_ptr<char> values;
+
+   care::paired_sort(keys, values);
+
+   EXPECT_EQ(keys.size(), 0);
+   EXPECT_EQ(keys.data(), nullptr);
+   EXPECT_EQ(values.size(), 0);
+   EXPECT_EQ(values.data(), nullptr);
+}
+
 // Verify that each segment is sorted independently and empty segments are
 // accepted without affecting adjacent segments.
-TEST(segmented_sort, segment_local_and_empty)
+TEST(segmented_sort, ascending)
 {
    care::host_device_ptr<int> keys(8);
    care::host_device_ptr<int> offsets(5);
@@ -140,26 +163,9 @@ TEST(segmented_sort, segment_local_and_empty)
    keys.free();
 }
 
-// Verify that sorting an empty key array is a no-op.
-TEST(segmented_sort, empty_input)
-{
-   care::host_device_ptr<int> keys;
-   care::host_device_ptr<int> offsets(1);
-
-   CARE_SEQUENTIAL_LOOP(i, 0, 1) {
-      offsets[i] = 0;
-   } CARE_SEQUENTIAL_LOOP_END
-
-   care::segmented_sort(keys, offsets);
-   offsets.free();
-
-   EXPECT_EQ(keys.size(), 0);
-   EXPECT_EQ(keys.data(), nullptr);
-}
-
 // Verify that sorting a slice updates its backing storage without replacing
 // the slice or modifying values outside it.
-TEST(segmented_sort, preserves_slice)
+TEST(segmented_sort, preserves_slices)
 {
    care::host_device_ptr<int> storage(6);
    care::host_device_ptr<int> keys = storage.slice(1, 4);
@@ -197,7 +203,21 @@ TEST(segmented_sort, preserves_slice)
    storage.free();
 }
 
-TEST(segmented_paired_sort, segment_local_and_empty)
+TEST(segmented_sort, empty)
+{
+   care::host_device_ptr<int> keys;
+   care::host_device_ptr<int> offsets(1);
+   offsets[0] = 0;
+
+   care::segmented_sort(keys, offsets);
+
+   EXPECT_EQ(keys.size(), 0);
+   EXPECT_EQ(keys.data(), nullptr);
+
+   offsets.free();
+}
+
+TEST(segmented_paired_sort, ascending)
 {
    care::host_device_ptr<int> keys(8);
    care::host_device_ptr<char> values(8);
@@ -305,19 +325,19 @@ TEST(segmented_paired_sort, preserves_slices)
    keyStorage.free();
 }
 
-TEST(sort, empty_inputs)
+TEST(segmented_paired_sort, empty)
 {
    care::host_device_ptr<int> keys;
    care::host_device_ptr<char> values;
    care::host_device_ptr<int> offsets(1);
    offsets[0] = 0;
 
-   care::sort(keys);
-   care::paired_sort(keys, values);
    care::segmented_paired_sort(keys, values, offsets);
 
    EXPECT_EQ(keys.size(), 0);
+   EXPECT_EQ(keys.data(), nullptr);
    EXPECT_EQ(values.size(), 0);
+   EXPECT_EQ(values.data(), nullptr);
 
    offsets.free();
 }
