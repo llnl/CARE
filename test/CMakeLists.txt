@@ -85,7 +85,7 @@ blt_add_test( NAME TestAlgorithm
               COMMAND TestAlgorithm )
 
 blt_add_executable( NAME TestSegmentedSort
-                    SOURCES TestSegmentedSort.cpp
+                    SOURCES TestSort.cpp
                     DEPENDS_ON ${care_test_dependencies} )
 
 target_include_directories(TestSegmentedSort
