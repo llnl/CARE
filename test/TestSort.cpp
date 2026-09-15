@@ -203,11 +203,31 @@ TEST(segmented_paired_sort, segment_local_and_empty)
    care::host_device_ptr<char> values(8);
    care::host_device_ptr<int> offsets(5);
 
-   const int inputKeys[] = {5, 1, 4, 9, 3, 8, 7, 2};
-   const char inputValues[] = {'e', 'a', 'd', 'i', 'c', 'h', 'g', 'b'};
+   const int inputKeys[] = {
+      5, 1, 4,
+      // empty segment
+      9, 3, 8,
+      7, 2
+   };
+   const char inputValues[] = {
+      'e', 'a', 'd',
+      // empty segment
+      'i', 'c', 'h',
+      'g', 'b'
+   };
    const int segmentOffsets[] = {0, 3, 3, 6, 8};
-   const int expectedKeys[] = {1, 4, 5, 3, 8, 9, 2, 7};
-   const char expectedValues[] = {'a', 'd', 'e', 'c', 'h', 'i', 'b', 'g'};
+   const int expectedKeys[] = {
+      1, 4, 5,
+      // empty segment
+      3, 8, 9,
+      2, 7
+   };
+   const char expectedValues[] = {
+      'a', 'd', 'e',
+      // empty segment
+      'c', 'h', 'i',
+      'b', 'g'
+   };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 8) {
       keys[i] = inputKeys[i];
@@ -238,11 +258,31 @@ TEST(segmented_paired_sort, preserves_slices)
    care::host_device_ptr<char> values = valueStorage.slice(1, 4);
    care::host_device_ptr<int> offsets(3);
 
-   const int inputKeys[] = {-1, 4, 2, 5, 3, -2};
-   const char inputValues[] = {'x', 'd', 'b', 'e', 'c', 'y'};
+   const int inputKeys[] = {
+      -1, // before slice
+      4, 2,
+      5, 3,
+      -2 // after slice
+   };
+   const char inputValues[] = {
+      'x', // before slice
+      'd', 'b',
+      'e', 'c',
+      'y' // after slice
+   };
    const int segmentOffsets[] = {0, 2, 4};
-   const int expectedKeys[] = {-1, 2, 4, 3, 5, -2};
-   const char expectedValues[] = {'x', 'b', 'd', 'c', 'e', 'y'};
+   const int expectedKeys[] = {
+      -1, // before slice
+      2, 4,
+      3, 5,
+      -2 // after slice
+   };
+   const char expectedValues[] = {
+      'x', // before slice
+      'b', 'd',
+      'c', 'e',
+      'y' // after slice
+   };
 
    CARE_SEQUENTIAL_LOOP(i, 0, 6) {
       keyStorage[i] = inputKeys[i];
