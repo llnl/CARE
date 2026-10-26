@@ -12,13 +12,16 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - Release date yyyy-mm-dd
+## [Version 2026.07.1] - Release date 2026-10-26
 
 ### Added
 - Added `host_device_ptr<T>::slice` function to make passing slices easier to algorithms.
 
 ### Changed
 - Inlined many device APIs to reduce the need for relocatable device code, though the LoopFuser still requires it.
+- Updated CHAI to v2026.07.1.
+- Updated RAJA to v2026.07.1.
+- Updated Umpire to v2026.07.2.
 
 ### Fixed
 - Fixed macro name conflict in tests.

@@ -18,7 +18,7 @@ cmake_policy(SET CMP0096 OLD) # Required when building Umpire submodule
 
 project(CARE
         LANGUAGES C CXX
-        VERSION 2026.07.0)
+        VERSION 2026.07.1)
 
 include(${PROJECT_SOURCE_DIR}/cmake/Setup.cmake)
 
