@@ -12,7 +12,7 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Version 2026.07.1] - Release date 2026-10-26
+## [Version 2026.07.1] - Release date 2026-10-27
 
 ### Added
 - Added `care::sort`, `care::paired_sort`, `care::segmented_sort`, and `care::segmented_paired_sort` for sorting keys and associated values in place, including within segments.
