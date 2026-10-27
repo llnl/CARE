@@ -23,54 +23,10 @@
 // Std library headers
 #include <concepts>
 #include <cstddef>
+#include <type_traits>
 
 
 namespace care {
-   ///////////////////////////////////////////////////////////////////////////
-   /// @struct _kv
-   /// @author Peter Robinson
-   /// @brief The key value pair struct used by the sequential version of
-   ///    KeyValueSorter
-   ///////////////////////////////////////////////////////////////////////////
-   template <typename KeyType, typename ValueType>
-   struct _kv {
-      KeyType key;
-      ValueType value;
-
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Peter Robinson
-      /// @brief Less than comparison operator
-      /// Used as a comparator in the STL
-      /// @param right - right _kv to compare
-      /// @return true if this value is less than right's value, false otherwise
-      ///////////////////////////////////////////////////////////////////////////
-      inline bool operator <(_kv const && right) { return value < right.value; };
-      ///////////////////////////////////////////////////////////////////////////
-      /// @author Peter Robinson
-      /// @brief Equality operator
-      /// Used as a comparator
-      /// @param right - right _kv to compare
-      /// @return true if this value is less than right's value, false otherwise
-      ///////////////////////////////////////////////////////////////////////////
-      inline bool operator ==(_kv const & right) const { return value == right.value && key == right.key;  };
-   };
-
-   ///
-   /// @author Alan Dayton
-   ///
-   /// @brief Overload operator<< for the _kv struct
-   ///
-   /// @param[in] os   The output stream
-   /// @param[in] kv   The struct to process
-   ///
-   /// @return   The output stream for chaining of operations
-   ///
-   template <typename KeyType, typename ValueType>
-   inline std::ostream& operator<<(std::ostream& os, const _kv<KeyType, ValueType>& kv) {
-      os << kv.key << ": " << kv.value;
-      return os;
-   }
-
    ///
    /// @author Peter Robinson, Ben Liu, Alan Dayton, Arlie Capps
    ///
@@ -205,11 +161,18 @@ namespace care {
       ///
       /// Convert to a host_device_ptr<const T>
       ///
-      template<bool B = std::is_const<T>::value,
-               typename std::enable_if<!B, int>::type = 0>
-      CARE_HOST_DEVICE operator host_device_ptr<const T> () const {
-         return *reinterpret_cast<host_device_ptr<const T> const *> (this);
+      /// @note U keeps the conversion target dependent,
+      ///       avoiding self-conversion warnings.
+      template <typename U = T>
+         requires (std::same_as<U, T> && !std::is_const_v<U>)
+      CARE_HOST_DEVICE operator host_device_ptr<const U>() const {
+         return *reinterpret_cast<const host_device_ptr<const U>*>(this);
       }
+
+      ///
+      /// Copy assignment operator
+      ///
+      host_device_ptr& operator=(const host_device_ptr& other) = default;
 
 #if defined(CARE_ENABLE_BOUNDS_CHECKING)
       template <class Index>
@@ -230,11 +193,6 @@ namespace care {
          }
       }
 #endif
-
-      ///
-      /// Copy assignment operator
-      ///
-      host_device_ptr& operator=(const host_device_ptr& other) = default;
 
       ///
       /// @author Peter Robinson
@@ -415,8 +373,8 @@ namespace care {
       //     *CPU_destination will be updated with a deep copy of this data
       //
       // TODO: Should this really live in chai::ManagedArray?
-      void freeDeviceMemory(T_non_const ** CPU_destination,
-                            size_t elems,
+      void freeDeviceMemory([[maybe_unused]] T_non_const ** CPU_destination,
+                            [[maybe_unused]] size_t elems,
                             bool deregisterPointer=true) {
 #if defined(CARE_DEEP_COPY_RAW_PTR)
          // if there is a pointer to update ...
@@ -512,10 +470,21 @@ namespace care {
       CARE_HOST void move(ExecutionSpace space) {
          MA::move(chai::ExecutionSpace((int) space));
       }
+
+      ///
+      /// Create a shallow slice of this array.
+      ///
+      /// @param begin The starting element of the slice.
+      /// @param elems The number of elements in the slice.
+      /// @return A host_device_ptr referring to the sliced range.
+      ///
+      CARE_HOST_DEVICE host_device_ptr<T> slice(size_t begin,
+                                                size_t elems = (size_t)-1) const {
+         return host_device_ptr<T>(MA::slice(begin, elems));
+      }
    }; // class host_device_ptr
 
 } // namespace care
 
 
 #endif // !defined(_CARE_HOST_DEVICE_PTR_H_)
-

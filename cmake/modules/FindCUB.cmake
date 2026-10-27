@@ -45,6 +45,7 @@ find_path(CUB_INCLUDE_DIR
           PATHS
              ${CUB_DIR}/
              ${CUB_DIR}/include/
+             ${CUB_DIR}/include/cccl/
           NO_DEFAULT_PATH)
 
 mark_as_advanced(CUB_INCLUDE_DIR)

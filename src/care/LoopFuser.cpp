@@ -283,14 +283,15 @@ void LoopFuser<REGISTER_COUNT,XARGS...>::flush_parallel_scans(const char * fileN
 
    /* need to write the scan positions to the output destinations */
    /* each destination is computed */
+   care::host_ptr<int> * pos_output_destinations = m_pos_output_destinations;
    CARE_SEQUENTIAL_LOOP(actionIndex, 0, action_count) {
       int scan_pos_offset = actionIndex == 0 ? 0 : scan_pos_outputs[actionIndex-1];
       int pos = scan_pos_outputs[actionIndex];
       pos -= scan_pos_offset;
-      *(m_pos_output_destinations[actionIndex].data()) += pos;
+      *(pos_output_destinations[actionIndex].data()) += pos;
       if (very_verbose) {
          printf("actionIndex %i: scan_pos_offset %i scan_pos_output %i pos %i store %i \n",
-                 actionIndex, scan_pos_offset, scan_pos_outputs[actionIndex], pos, *(m_pos_output_destinations[actionIndex].data()));
+                 actionIndex, scan_pos_offset, scan_pos_outputs[actionIndex], pos, *(pos_output_destinations[actionIndex].data()));
       }
    } CARE_SEQUENTIAL_LOOP_END
    scan_var.free();

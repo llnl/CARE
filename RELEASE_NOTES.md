@@ -12,10 +12,32 @@ in this file.
 
 The format of this file is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Version 2026.07.1] - Release date 2026-10-27
+
+### Added
+- Added `care::sort`, `care::paired_sort`, `care::segmented_sort`, and `care::segmented_paired_sort` for sorting keys and associated values in place, including within segments.
+- Added `care::segmented_exclusive_scan` for in-place scans within segments, with optional initial value and binary operation.
+- Added `care::segmented_unique` to compact sorted keys within each segment and update segment offsets, with an optional equality predicate.
+- Added `host_device_ptr<T>::slice` to create a shallow view of a range for use with algorithms.
+- Added `MANAGED_PTR_SCAN_EVERYWHERE_LOOP` and `MANAGED_PTR_SCAN_EVERYWHERE_LOOP_END` macros.
+
+### Changed
+- Inlined many device APIs to reduce the need for relocatable device code; the LoopFuser still requires it.
+- Refactored the CPU `care::KeyValueSorter` implementation to sort key and value arrays directly through a zip iterator.
+- Updated CHAI to v2026.07.1.
+- Updated RAJA to v2026.07.1.
+- Updated Umpire to v2026.07.2.
+
+### Fixed
+- Added `${CUB_DIR}/include/cccl` to the CUB search paths for better integration with CUDA 13.
+- Resolved ambiguous `host_device_ptr` implicit conversions and several compiler warnings.
+- Selected the GPU simulation execution policy for reductions in GPU simulation mode.
+- Fixed macro name conflict in tests.
+
 ## [Version 2026.07.0] - Release date 2026-08-11
 
 ### Added
-- Add ATOMIC\_GENERIC and ATOMIC\_GENERIC\_WITH\_STOP for new generic atomic implementations in RAJA v2026.07.0.
+- Add `ATOMIC_GENERIC` and `ATOMIC_GENERIC_WITH_STOP` for new generic atomic implementations in RAJA v2026.07.0.
 - Added `sortKeyValueArrays` for simultaneously sorting two arrays.
 - Added additional instantiations when configured with explicit template instantiations.
 

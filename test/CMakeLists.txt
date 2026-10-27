@@ -84,6 +84,45 @@ target_include_directories(TestAlgorithm
 blt_add_test( NAME TestAlgorithm
               COMMAND TestAlgorithm )
 
+blt_add_executable( NAME TestSegmentedSort
+                    SOURCES TestSort.cpp
+                    DEPENDS_ON ${care_test_dependencies} )
+
+target_include_directories(TestSegmentedSort
+                           PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(TestSegmentedSort
+                           PRIVATE ${PROJECT_BINARY_DIR}/include)
+
+blt_add_test( NAME TestSegmentedSort
+              COMMAND TestSegmentedSort )
+
+blt_add_executable( NAME TestSegmentedScan
+                    SOURCES TestSegmentedScan.cpp
+                    DEPENDS_ON ${care_test_dependencies} )
+
+target_include_directories(TestSegmentedScan
+                           PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(TestSegmentedScan
+                           PRIVATE ${PROJECT_BINARY_DIR}/include)
+
+blt_add_test( NAME TestSegmentedScan
+              COMMAND TestSegmentedScan )
+
+blt_add_executable( NAME TestSegmentedUnique
+                    SOURCES TestSegmentedUnique.cpp
+                    DEPENDS_ON ${care_test_dependencies} )
+
+target_include_directories(TestSegmentedUnique
+                           PRIVATE ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(TestSegmentedUnique
+                           PRIVATE ${PROJECT_BINARY_DIR}/include)
+
+blt_add_test( NAME TestSegmentedUnique
+              COMMAND TestSegmentedUnique )
+
 blt_add_executable( NAME TestKeyValueSorter
                     SOURCES TestKeyValueSorter.cpp
                     DEPENDS_ON ${care_test_dependencies} )
